@@ -30,7 +30,7 @@ export const productRouter = createTRPCRouter({
         name: z.string().min(1, "Product name is required"),
         sku: z.string().min(1, "SKU is required"),
         category: z.string().default("Product"),
-        costPrice: z.number().min(0, "Cost price cannot be negative"),
+        costPrice: z.number().min(0, "Cost price cannot be negative").default(0), // Made optional with default 0
         price: z.number().positive("Sell price must be greater than 0"),
         stockQty: z.number().min(0, "Stock cannot be negative"),
         unitType: z.string().default("UNITS"),
@@ -57,7 +57,7 @@ export const productRouter = createTRPCRouter({
         name: z.string().min(1),
         sku: z.string().min(1),
         category: z.string(),
-        costPrice: z.number().min(0),
+        costPrice: z.number().min(0).default(0), // Made optional with default 0
         price: z.number().positive(),
         stockQty: z.number().min(0),
         unitType: z.string(),
@@ -86,7 +86,7 @@ export const productRouter = createTRPCRouter({
       });
     }),
 
-    updateStock: publicProcedure
+  updateStock: publicProcedure
     .input(
       z.object({
         id: z.string(),
@@ -94,11 +94,9 @@ export const productRouter = createTRPCRouter({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      // Example implementation using Prisma or your database client:
       return ctx.db.product.update({
         where: { id: input.id },
         data: { stockQty: input.stockQty },
       });
     }),
-
 });
