@@ -35,9 +35,9 @@ export default function ProductsPage() {
     createMutation.mutate({
       name,
       sku,
-      costPrice: parseFloat(costPrice),
-      price: parseFloat(price),
-      stockQty: parseInt(stockQty, 10),
+      costPrice: costPrice ? parseFloat(costPrice) : 0,
+      price: price ? parseFloat(price) : 0,
+      stockQty: stockQty ? parseInt(stockQty, 10) : 0,
     });
   };
 
