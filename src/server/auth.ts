@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import Google from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "@/server/db";
+import { authConfig } from "./auth.config";
 
 declare module "next-auth" {
   interface Session extends DefaultSession {
@@ -18,6 +19,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   secret: process.env.AUTH_SECRET,
   session: {
     strategy: "jwt",
+    ...authConfig,
   },
   callbacks: {
     async jwt({ token, user }) {
