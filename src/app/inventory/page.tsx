@@ -132,9 +132,9 @@ export default function InventoryPage() {
   });
 
   // Analytics quick calculations
-  const totalItemsCount = products?.length || 0;
-  const lowOrOutStockCount = products?.filter(p => p.stockQty <= 0).length || 0;
-  const totalValuation = products?.reduce((acc, p) => acc + (p.price * p.stockQty), 0) || 0;
+  const totalItemsCount = products?.length ?? 0;
+  const lowOrOutStockCount = products?.filter(p => p.stockQty <= 0).length ?? 0;
+  const totalValuation = products?.reduce((acc, p) => acc + (p.price * p.stockQty), 0) ?? 0;
 
   return (
     <div className="fixed inset-0 h-screen w-screen overflow-hidden bg-[#090D16] text-slate-100 font-sans flex flex-col selection:bg-indigo-500 selection:text-white">

@@ -15,7 +15,7 @@ export function getStoredLogs(): TelemetryLog[] {
   if (typeof window === 'undefined') return [];
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    return raw ? (JSON.parse(raw) as TelemetryLog[]) : [];
   } catch {
     return [];
   }

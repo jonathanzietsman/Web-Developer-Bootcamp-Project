@@ -25,9 +25,9 @@ export default function GlobalActivityTracker() {
 
       if (interactiveEl) {
         const label = 
-          interactiveEl.getAttribute('aria-label') || 
-          interactiveEl.textContent?.trim().slice(0, 30) || 
-          interactiveEl.id || 
+          interactiveEl.getAttribute('aria-label') ?? 
+          interactiveEl.textContent?.trim().slice(0, 30) ?? 
+          interactiveEl.id ?? 
           interactiveEl.tagName.toLowerCase();
 
         pushTelemetry('CLICK', `Clicked [${interactiveEl.tagName}] -> "${label}"`);
