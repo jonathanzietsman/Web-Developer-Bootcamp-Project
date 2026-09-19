@@ -1,4 +1,3 @@
-// src/app/pos/page.tsx[cite: 13]
 "use client";
 
 import { useState } from "react";
@@ -30,7 +29,8 @@ import {
   Database,
   BarChart3,
   Tag,
-  ChevronRight
+  ChevronRight,
+  LayoutGrid
 } from "lucide-react";
 
 interface CartItem {
@@ -47,7 +47,7 @@ interface BundleRule {
   name: string;
   targetSkuPattern: string;
   requiredQty: number;
-  bundlePrice: number | { toNumber(): number }; // Handles Prisma Decimal or number types
+  bundlePrice: number | { toNumber(): number };
 }
 
 function calculateCartTotals(cart: CartItem[], discountPercent: number, activeBundleRules?: BundleRule[]) {
@@ -95,7 +95,6 @@ function calculateCartTotals(cart: CartItem[], discountPercent: number, activeBu
   const adjustedSubtotal = Math.max(0, subtotal - totalBundleSavings);
   const percentageDiscountAmount = adjustedSubtotal * (discountPercent / 100);
   const finalTotal = Math.max(0, adjustedSubtotal - percentageDiscountAmount);
-  
 
   return {
     subtotal,
@@ -120,15 +119,15 @@ export default function POSPage() {
   const [discountPercent, setDiscountPercent] = useState<number>(0);
   const createCashLogMutation = api.cashLog.create.useMutation();
 
-  // Navigation Drawer State
+  // Navigation & View Drawer State
   const [isNavOpen, setIsNavOpen] = useState(false);
+  const [mobileTab, setMobileTab] = useState<"CATALOG" | "CART">("CATALOG");
 
   // Editor State (Price & Quantity)
   const [editingProduct, setEditingProduct] = useState<{ id: string; name: string; sku: string; price: number; stockQty: number } | null>(null);
-  const [newPrice, setNewPrice] = useState<number>(0);
   const [newStock, setNewStock] = useState<number>(0);
 
-  // Mutations — Declared before handleSave and UI references
+  // Stock Mutation
   const updateStockMutation = api.product.updateStock.useMutation({
     onSuccess: () => {
       void utils.product.getAll.invalidate();
@@ -211,10 +210,9 @@ export default function POSPage() {
         });
       }
 
-      // Record transaction into the Cash/Card Ledger
       await createCashLogMutation.mutateAsync({
         type: "IN",
-        method: paymentMethod, // "CASH" or "CARD"
+        method: paymentMethod,
         amount: finalTotal,
         reason: `POS Sale via ${paymentMethod} (${cart.length} items)`,
       });
@@ -236,16 +234,18 @@ export default function POSPage() {
     }
   };
 
+  const totalCartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
+
   return (
     <div className="fixed inset-0 h-screen w-screen overflow-hidden bg-[#090D16] text-slate-100 font-sans flex flex-col selection:bg-indigo-500 selection:text-white">
       
-      {/* Background Glows */}
+      {/* Dynamic Background Glows */}
       <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none"></div>
       <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-600/10 rounded-full blur-[120px] pointer-events-none"></div>
 
       {/* TOP HEADER */}
-      <header className="relative z-20 flex items-center justify-between px-8 py-4 border-b border-white/5 bg-[#0D1322]/80 backdrop-blur-xl shadow-sm shrink-0">
-        <div className="flex items-center gap-4">
+      <header className="relative z-20 flex items-center justify-between px-4 sm:px-8 py-3.5 border-b border-white/5 bg-[#0D1322]/80 backdrop-blur-xl shadow-sm shrink-0">
+        <div className="flex items-center gap-3 sm:gap-4">
           <button 
             type="button"
             onClick={() => setIsNavOpen(true)}
@@ -255,26 +255,53 @@ export default function POSPage() {
             <Terminal className="h-4 w-4 group-hover:scale-110 transition-transform" />
           </button>
           <div>
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-sm font-bold tracking-tight text-white flex items-center gap-2">
-                <ShoppingCart className="h-4 w-4 text-indigo-400" />
-                POS Terminal Command Center
+            <div className="flex items-center gap-2">
+              <h1 className="text-xs sm:text-sm font-bold tracking-tight text-white flex items-center gap-2">
+                <ShoppingCart className="h-4 w-4 text-indigo-400 hidden sm:inline" />
+                POS Terminal
               </h1>
               <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-400 border border-emerald-500/20 flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                LIVE SYNC
+                <span className="hidden sm:inline">LIVE SYNC</span>
               </span>
             </div>
-            <p className="text-xs text-slate-400 mt-0.5">High-speed register processing, instant cart calculation, and live stock updates</p>
+            <p className="text-[11px] text-slate-400 hidden sm:block mt-0.5">Real-time register terminal & stock tracking</p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          <div className="hidden md:flex items-center gap-2 rounded-xl border border-white/5 bg-white/[0.02] px-3.5 py-1.5 text-xs text-slate-300">
+        {/* Mobile View Toggle */}
+        <div className="flex lg:hidden items-center gap-1 bg-white/5 p-1 rounded-xl border border-white/10">
+          <button
+            onClick={() => setMobileTab("CATALOG")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition ${
+              mobileTab === "CATALOG" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-400"
+            }`}
+          >
+            <LayoutGrid className="h-3.5 w-3.5" />
+            <span>Catalog</span>
+          </button>
+          <button
+            onClick={() => setMobileTab("CART")}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition relative ${
+              mobileTab === "CART" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-400"
+            }`}
+          >
+            <ShoppingCart className="h-3.5 w-3.5" />
+            <span>Cart</span>
+            {totalCartCount > 0 && (
+              <span className="ml-1 px-1.5 py-0.2 bg-emerald-500 text-[#090D16] text-[10px] font-bold rounded-full">
+                {totalCartCount}
+              </span>
+            )}
+          </button>
+        </div>
+
+        <div className="hidden md:flex items-center gap-3">
+          <div className="flex items-center gap-2 rounded-xl border border-white/5 bg-white/[0.02] px-3.5 py-1.5 text-xs text-slate-300">
             <Activity className="h-4 w-4 text-emerald-400 animate-pulse" />
             <span>Latency: 14ms</span>
           </div>
-          <div className="hidden md:flex items-center gap-2 rounded-xl border border-white/5 bg-white/[0.02] px-3.5 py-1.5 text-xs text-slate-300">
+          <div className="flex items-center gap-2 rounded-xl border border-white/5 bg-white/[0.02] px-3.5 py-1.5 text-xs text-slate-300">
             <ShieldCheck className="h-4 w-4 text-emerald-400" />
             <span>Encrypted Ledger</span>
           </div>
@@ -282,12 +309,14 @@ export default function POSPage() {
       </header>
 
       {/* MAIN VIEWPORT BODY */}
-      <div className="relative flex flex-1 flex-col lg:flex-row overflow-hidden p-6 lg:p-8 gap-6 max-w-[1700px] w-full mx-auto">
+      <div className="relative flex flex-1 flex-col lg:flex-row overflow-hidden p-4 sm:p-6 lg:p-8 gap-4 sm:gap-6 max-w-[1700px] w-full mx-auto">
         
         {/* LEFT: Product Catalog */}
-        <div className="flex flex-1 flex-col h-full bg-[#0E1526]/80 border border-white/5 rounded-2xl backdrop-blur-xl p-6 overflow-hidden shadow-xl">
+        <div className={`flex-1 flex-col h-full bg-[#0E1526]/80 border border-white/5 rounded-2xl backdrop-blur-xl p-4 sm:p-6 overflow-hidden shadow-xl ${
+          mobileTab === "CATALOG" ? "flex" : "hidden lg:flex"
+        }`}>
           
-          <div className="relative mb-5 shrink-0">
+          <div className="relative mb-4 sm:mb-5 shrink-0">
             <Search className="absolute left-4 top-3.5 h-4 w-4 text-slate-400" />
             <input
               type="text"
@@ -298,14 +327,14 @@ export default function POSPage() {
             />
           </div>
 
-          <div className="flex-1 overflow-y-auto pr-1 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-white/5 [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full">
+          <div className="flex-1 overflow-y-auto pr-1 custom-scrollbar">
             {productsLoading ? (
               <div className="flex h-full items-center justify-center text-indigo-400 text-xs gap-3">
                 <Cpu className="h-5 w-5 animate-spin" />
-                <span className="font-medium">Querying secure database nodes...</span>
+                <span className="font-medium">Querying database nodes...</span>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3 pb-4">
+              <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2 xl:grid-cols-3 pb-4">
                 {filteredProducts?.map((product) => {
                   const isOutOfStock = product.stockQty <= 0;
                   return (
@@ -314,7 +343,7 @@ export default function POSPage() {
                       className={`group relative flex flex-col justify-between rounded-2xl border p-4 transition ${
                         isOutOfStock 
                           ? "border-white/5 bg-[#0A0E1A]/40 opacity-50" 
-                          : "border-white/5 bg-[#0A0E1A]/80 hover:border-indigo-500/30 hover:bg-[#0E1526] shadow-lg"
+                          : "border-white/5 bg-[#0A0E1A]/80 hover:border-indigo-500/40 hover:bg-[#0E1526] shadow-lg"
                       }`}
                     >
                       <div 
@@ -345,7 +374,6 @@ export default function POSPage() {
                             e.stopPropagation();
                             pushTelemetry("CLICK", `Opened parameter configuration modal for SKU: ${product.sku}`);
                             setEditingProduct({ id: product.id, name: product.name, sku: product.sku, price: product.price, stockQty: product.stockQty });
-                            setNewPrice(product.price);
                             setNewStock(product.stockQty);
                           }}
                           className="flex items-center gap-1.5 rounded-xl bg-white/5 hover:bg-white/10 px-3 py-1.5 text-xs font-semibold text-indigo-400 border border-white/10 transition cursor-pointer"
@@ -363,21 +391,23 @@ export default function POSPage() {
         </div>
 
         {/* RIGHT: Cart & Checkout Panel */}
-        <div className="flex w-full lg:w-[440px] flex-col h-full bg-[#0E1526]/80 border border-white/5 rounded-2xl p-6 backdrop-blur-xl shadow-xl overflow-hidden shrink-0">
+        <div className={`w-full lg:w-[420px] xl:w-[460px] flex-col h-full bg-[#0E1526]/80 border border-white/5 rounded-2xl p-4 sm:p-6 backdrop-blur-xl shadow-xl overflow-hidden shrink-0 ${
+          mobileTab === "CART" ? "flex" : "hidden lg:flex"
+        }`}>
           
           <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-4 shrink-0">
             <div className="flex items-center gap-2.5 text-xs font-bold text-white uppercase tracking-wider">
               <ShoppingCart className="h-4 w-4 text-indigo-400" />
-              <span>Current Cart Ledger</span>
+              <span>Active Cart Ledger</span>
             </div>
             <span className="rounded-full bg-indigo-500/10 px-2.5 py-0.5 text-[10px] font-semibold text-indigo-400 border border-indigo-500/20">
-              {cart.reduce((acc, item) => acc + item.quantity, 0)} ITEMS
+              {totalCartCount} ITEMS
             </span>
           </div>
 
-          <div className="flex-1 overflow-y-auto divide-y divide-white/5 pr-1 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-white/5 [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-thumb]:rounded-full">
+          <div className="flex-1 overflow-y-auto divide-y divide-white/5 pr-1 custom-scrollbar">
             {cart.length === 0 ? (
-              <div className="h-full flex flex-col items-center justify-center text-slate-500 text-xs gap-3">
+              <div className="h-full flex flex-col items-center justify-center text-slate-500 text-xs gap-3 py-10">
                 <div className="h-12 w-12 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-400">
                   <AlertTriangle className="h-6 w-6" />
                 </div>
@@ -390,7 +420,7 @@ export default function POSPage() {
                     <p className="font-semibold text-white text-xs truncate">{item.name}</p>
                     <p className="text-[11px] text-indigo-400 mt-0.5">R{item.price.toFixed(2)} each</p>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-2.5">
                     <div className="flex items-center rounded-xl border border-white/10 bg-[#070A12] px-1 py-1">
                       <button onClick={() => updateQuantity(item.id, -1)} className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/5 transition cursor-pointer">
                         <Minus className="h-3 w-3" />
@@ -409,7 +439,7 @@ export default function POSPage() {
             )}
           </div>
 
-          <div className="border-t border-white/5 pt-4 mt-4 space-y-4 shrink-0">
+          <div className="border-t border-white/5 pt-4 mt-4 space-y-3.5 shrink-0">
             
             <div className="grid grid-cols-2 gap-2.5">
               <button
@@ -442,12 +472,12 @@ export default function POSPage() {
               </button>
             </div>
 
-            <div className="flex items-center justify-between text-xs text-slate-300 bg-[#070A12] p-3 rounded-xl border border-white/10">
+            <div className="flex items-center justify-between text-xs text-slate-300 bg-[#070A12] p-2.5 rounded-xl border border-white/10">
               <div className="flex items-center gap-2">
                 <Percent className="h-3.5 w-3.5 text-indigo-400" />
-                <span>Discount Rebate:</span>
+                <span>Rebate Discount:</span>
               </div>
-              <div className="flex gap-1.5">
+              <div className="flex gap-1">
                 {[0, 5, 10, 15].map((pct) => (
                   <button
                     key={pct}
@@ -455,7 +485,7 @@ export default function POSPage() {
                       setDiscountPercent(pct);
                       pushTelemetry("CLICK", `Applied discount rebate tier: ${pct}%`);
                     }}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer border ${
+                    className={`px-2 py-1 rounded-lg text-[11px] font-semibold transition cursor-pointer border ${
                       discountPercent === pct 
                         ? "bg-indigo-600 text-white border-indigo-500 shadow-sm" 
                         : "border-white/5 bg-white/[0.02] text-slate-400 hover:text-white"
@@ -467,7 +497,7 @@ export default function POSPage() {
               </div>
             </div>
 
-            <div className="space-y-2 text-xs text-slate-400">
+            <div className="space-y-1.5 text-xs text-slate-400">
               <div className="flex justify-between">
                 <span>Subtotal</span>
                 <span className="text-slate-200">R{subtotal.toFixed(2)}</span>
@@ -494,7 +524,7 @@ export default function POSPage() {
             </div>
 
             {checkoutStatus && (
-              <div className="rounded-xl border border-indigo-500/40 bg-indigo-500/10 p-3 text-center text-xs font-bold text-indigo-300 flex items-center justify-center gap-2">
+              <div className="rounded-xl border border-indigo-500/40 bg-indigo-500/10 p-2.5 text-center text-xs font-bold text-indigo-300 flex items-center justify-center gap-2">
                 <CheckCircle2 className="h-4 w-4" />
                 <span>{checkoutStatus}</span>
               </div>
@@ -646,7 +676,7 @@ export default function POSPage() {
               <div>
                 <h3 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
                   <Sliders className="h-4 w-4 text-indigo-400" />
-                  Configure Item Parameters
+                  Configure Stock Parameter
                 </h3>
               </div>
               <button 
@@ -660,27 +690,14 @@ export default function POSPage() {
             <div className="space-y-1 rounded-xl bg-white/[0.02] border border-white/5 p-3">
               <p className="font-semibold text-white text-xs">{editingProduct.name}</p>
               <p className="text-[11px] text-slate-400 font-mono">SKU: {editingProduct.sku}</p>
+              <p className="text-[11px] text-emerald-400 font-medium pt-1">Price: R{editingProduct.price.toFixed(2)}</p>
             </div>
 
             <div className="space-y-4 text-xs">
               <div>
-                <label className="text-xs font-semibold text-slate-300 block mb-1.5">Price (R)</label>
-                <div className="relative group">
-                  <span className="absolute left-3.5 top-2.5 text-slate-400 font-bold group-focus-within:text-indigo-400 transition">R</span>
-                  <input
-                    type="number"
-                    step="0.01"
-                    className="w-full rounded-xl border border-white/10 bg-[#070A12] px-4 py-2.5 pl-9 text-xs font-medium text-white placeholder-slate-500 hover:border-white/20 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none transition shadow-inner [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
-                    value={newPrice}
-                    onChange={(e) => setNewPrice(Number(e.target.value))}
-                  />
-                </div>
-              </div>
-
-              <div>
                 <label className="text-xs font-semibold text-slate-300 block mb-1.5">Stock Quantity</label>
                 <div className="relative">
-                  <Package className="absolute left-3.5 top-3 h-4 w-4 text-slate-400 group-focus-within:text-indigo-400 transition" />
+                  <Package className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
                   <input
                     type="number"
                     className="w-full rounded-xl border border-white/10 bg-[#070A12] px-4 py-2.5 pl-10 text-xs font-medium text-white placeholder-slate-500 hover:border-white/20 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none transition shadow-inner [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
@@ -704,7 +721,7 @@ export default function POSPage() {
                 className="flex-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 py-3 text-xs font-bold text-white shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2 transition disabled:opacity-50 cursor-pointer"
               >
                 {updateStockMutation.isPending ? <RefreshCw className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
-                <span>Save Changes</span>
+                <span>Save Stock</span>
               </button>
             </div>
 

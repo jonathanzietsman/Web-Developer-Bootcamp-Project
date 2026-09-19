@@ -214,10 +214,10 @@ export default function HomePage() {
 
   if (status === "loading") {
     return (
-      <div className="fixed inset-0 flex h-screen w-screen items-center justify-center overflow-hidden bg-[#090D16] font-sans text-indigo-400">
-        <div className="flex animate-pulse items-center gap-3">
-          <Cpu className="h-5 w-5 animate-spin" />
-          <span className="text-xs font-semibold">
+      <div className="flex min-h-[calc(100vh-4rem)] w-full items-center justify-center bg-slate-950 font-mono text-cyan-400">
+        <div className="flex animate-pulse items-center gap-3 rounded-2xl border border-cyan-500/30 bg-slate-900/80 px-6 py-4 shadow-[0_0_30px_rgba(6,182,212,0.15)]">
+          <Cpu className="h-5 w-5 animate-spin text-cyan-400" />
+          <span className="text-xs font-bold tracking-widest">
             ESTABLISHING SECURE HANDSHAKE...
           </span>
         </div>
@@ -227,26 +227,24 @@ export default function HomePage() {
 
   if (!session) {
     return (
-      <div className="fixed inset-0 flex h-screen w-screen flex-col items-center justify-center overflow-hidden bg-[#090D16] p-4 font-sans text-slate-100 selection:bg-indigo-500 selection:text-white">
-        <div className="pointer-events-none absolute top-0 left-1/4 h-96 w-96 rounded-full bg-indigo-600/10 blur-[120px]"></div>
-        <div className="pointer-events-none absolute right-1/4 bottom-0 h-96 w-96 rounded-full bg-cyan-600/10 blur-[120px]"></div>
+      <div className="relative flex min-h-[calc(100vh-4rem)] w-full flex-col items-center justify-center bg-slate-950 p-4 font-mono text-slate-100 selection:bg-cyan-500 selection:text-slate-950">
+        <div className="pointer-events-none absolute top-1/4 left-1/2 -translate-x-1/2 h-96 w-96 rounded-full bg-cyan-500/10 blur-[120px]"></div>
 
-        <div className="relative w-full max-w-md space-y-6 rounded-2xl border border-white/5 bg-[#0E1526]/90 p-8 text-center shadow-2xl backdrop-blur-2xl">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400 shadow-inner">
+        <div className="relative w-full max-w-md space-y-6 rounded-2xl border border-cyan-500/30 bg-slate-900/90 p-8 text-center shadow-[0_0_50px_rgba(0,0,0,0.8)] backdrop-blur-2xl">
+          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-cyan-500/40 bg-cyan-950/60 text-cyan-400 shadow-[0_0_20px_rgba(6,182,212,0.3)]">
             <Lock className="h-6 w-6" />
           </div>
 
           <div>
-            <h1 className="text-sm font-bold tracking-tight text-white uppercase">
-              ApexOS // Auth Gateway
+            <h1 className="text-sm font-black tracking-widest text-white uppercase">
+              APEX_OS // AUTH GATEWAY
             </h1>
             <p className="mt-1.5 text-xs text-slate-400">
-              Enter credentials or create a new user account to access the POS
-              matrix.
+              Enter operator credentials to initiate command session.
             </p>
           </div>
 
-          <div className="flex rounded-xl border border-white/5 bg-white/5 p-1">
+          <div className="flex rounded-xl border border-slate-800 bg-slate-950/60 p-1">
             <button
               type="button"
               onClick={() => {
@@ -254,9 +252,13 @@ export default function HomePage() {
                 setAuthError("");
                 setAuthSuccess("");
               }}
-              className={`flex-1 rounded-lg py-1.5 text-xs font-bold transition ${authMode === "login" ? "bg-indigo-600 text-white shadow" : "text-slate-400 hover:text-white"}`}
+              className={`flex-1 rounded-lg py-2 text-xs font-bold transition ${
+                authMode === "login"
+                  ? "border border-cyan-500/50 bg-cyan-500/20 text-cyan-300 shadow-[0_0_10px_rgba(6,182,212,0.2)]"
+                  : "text-slate-400 hover:text-white"
+              }`}
             >
-              Sign In
+              SIGN IN
             </button>
             <button
               type="button"
@@ -265,16 +267,20 @@ export default function HomePage() {
                 setAuthError("");
                 setAuthSuccess("");
               }}
-              className={`flex-1 rounded-lg py-1.5 text-xs font-bold transition ${authMode === "register" ? "bg-indigo-600 text-white shadow" : "text-slate-400 hover:text-white"}`}
+              className={`flex-1 rounded-lg py-2 text-xs font-bold transition ${
+                authMode === "register"
+                  ? "border border-cyan-500/50 bg-cyan-500/20 text-cyan-300 shadow-[0_0_10px_rgba(6,182,212,0.2)]"
+                  : "text-slate-400 hover:text-white"
+              }`}
             >
-              Register
+              REGISTER
             </button>
           </div>
 
-          <form onSubmit={handleAuthSubmit} className="space-y-3 text-left">
+          <form onSubmit={handleAuthSubmit} className="space-y-4 text-left">
             {authMode === "register" && (
               <div>
-                <label className="text-[10px] font-bold text-slate-400 uppercase">
+                <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                   Full Name
                 </label>
                 <input
@@ -282,13 +288,13 @@ export default function HomePage() {
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Operator Name"
-                  className="mt-1 w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-xs text-white focus:border-indigo-500 focus:outline-none"
+                  className="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 text-xs text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
                 />
               </div>
             )}
 
             <div>
-              <label className="text-[10px] font-bold text-slate-400 uppercase">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                 Email Address
               </label>
               <input
@@ -297,12 +303,12 @@ export default function HomePage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="operator@apexpos.com"
-                className="mt-1 w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-xs text-white focus:border-indigo-500 focus:outline-none"
+                className="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 text-xs text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
               />
             </div>
 
             <div>
-              <label className="text-[10px] font-bold text-slate-400 uppercase">
+              <label className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
                 Password
               </label>
               <input
@@ -311,7 +317,7 @@ export default function HomePage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="mt-1 w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-xs text-white focus:border-indigo-500 focus:outline-none"
+                className="mt-1 w-full rounded-xl border border-slate-800 bg-slate-950 px-3.5 py-2.5 text-xs text-white focus:border-cyan-500 focus:outline-none focus:ring-1 focus:ring-cyan-500"
               />
             </div>
 
@@ -329,7 +335,7 @@ export default function HomePage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl bg-indigo-600 py-3 text-xs font-bold text-white shadow-lg shadow-indigo-600/20 transition hover:bg-indigo-500 disabled:opacity-50"
+              className="mt-2 flex w-full cursor-pointer items-center justify-center gap-2 rounded-xl border border-cyan-500/60 bg-cyan-500/25 py-3 text-xs font-bold text-cyan-200 shadow-[0_0_20px_rgba(6,182,212,0.3)] transition hover:bg-cyan-500/35 disabled:opacity-50"
             >
               {authMode === "login" ? (
                 <LogIn className="h-4 w-4" />
@@ -339,7 +345,7 @@ export default function HomePage() {
               {isSubmitting
                 ? "PROCESSING..."
                 : authMode === "login"
-                  ? "SIGN IN"
+                  ? "AUTHENTICATE"
                   : "CREATE ACCOUNT"}
             </button>
           </form>
@@ -349,51 +355,45 @@ export default function HomePage() {
   }
 
   return (
-    <div className="fixed inset-0 flex h-screen w-screen flex-col overflow-hidden bg-[#090D16] font-sans text-slate-100 selection:bg-indigo-500 selection:text-white">
-      <div className="pointer-events-none absolute top-0 left-1/4 h-96 w-96 rounded-full bg-indigo-600/10 blur-[120px]"></div>
-      <div className="pointer-events-none absolute right-1/4 bottom-0 h-96 w-96 rounded-full bg-cyan-600/10 blur-[120px]"></div>
-
-      {/* TOP HEADER */}
-      <header className="relative z-20 flex shrink-0 items-center justify-between border-b border-white/5 bg-[#0D1322]/80 px-8 py-4 shadow-sm backdrop-blur-xl">
+    <div className="flex-1 flex flex-col bg-slate-950 font-mono text-slate-100 selection:bg-cyan-500 selection:text-slate-950">
+      
+      {/* TOP COMMAND SUB-HEADER */}
+      <header className="sticky top-16 z-20 flex shrink-0 items-center justify-between border-b border-slate-800/80 bg-slate-950/80 px-6 py-3.5 backdrop-blur-xl">
         <div className="flex items-center gap-4">
           <button
             type="button"
             onClick={() => setIsNavOpen(true)}
-            className="group flex h-10 w-10 cursor-pointer items-center justify-center rounded-xl border border-white/10 bg-white/5 text-indigo-400 shadow-inner transition hover:border-indigo-500/30 hover:bg-white/10"
-            title="Open System Navigation"
+            className="group flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl border border-cyan-500/30 bg-cyan-950/40 text-cyan-400 shadow-sm transition hover:border-cyan-400 hover:bg-cyan-900/50"
+            title="Open System Drawer"
           >
             <Terminal className="h-4 w-4 transition-transform group-hover:scale-110" />
           </button>
           <div>
             <div className="flex items-center gap-2.5">
-              <h1 className="flex items-center gap-2 text-sm font-bold tracking-tight text-white">
-                <Cpu className="h-4 w-4 text-indigo-400" />
-                ApexOS Command Center
+              <h1 className="flex items-center gap-2 text-xs sm:text-sm font-bold tracking-wider text-white uppercase">
+                <Cpu className="h-4 w-4 text-cyan-400" />
+                ApexOS Command Matrix
               </h1>
-              <span className="flex items-center gap-1 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-medium text-emerald-400">
+              <span className="hidden sm:flex items-center gap-1 rounded-full border border-emerald-500/30 bg-emerald-950/40 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
                 <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400"></span>
-                SYSTEM ONLINE
+                ACTIVE LINK
               </span>
             </div>
-            <p className="mt-0.5 text-xs text-slate-400">
-              Next-generation enterprise point of sale and tactical terminal
-              ledger
-            </p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="hidden items-center gap-2 rounded-xl border border-white/5 bg-white/[0.02] px-3.5 py-1.5 text-xs text-slate-300 md:flex">
-            <Radio className="h-4 w-4 animate-pulse text-emerald-400" />
-            <span>Nodes Connected</span>
+          <div className="hidden lg:flex items-center gap-2 rounded-xl border border-slate-800 bg-slate-900/60 px-3 py-1.5 text-xs text-slate-300">
+            <Radio className="h-3.5 w-3.5 animate-pulse text-emerald-400" />
+            <span>PostgreSQL Pool Ready</span>
           </div>
           <button
             onClick={handleGlobalSync}
             disabled={isSyncing}
-            className="flex cursor-pointer items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3.5 py-1.5 text-xs font-semibold text-slate-200 transition hover:bg-white/10 disabled:opacity-50"
+            className="flex cursor-pointer items-center gap-2 rounded-xl border border-cyan-500/40 bg-cyan-950/50 px-3.5 py-1.5 text-xs font-bold text-cyan-300 transition hover:bg-cyan-900/60 disabled:opacity-50 shadow-inner"
           >
             <RefreshCw
-              className={`h-3.5 w-3.5 text-indigo-400 ${isSyncing ? "animate-spin" : ""}`}
+              className={`h-3.5 w-3.5 text-cyan-400 ${isSyncing ? "animate-spin" : ""}`}
             />
             <span>{isSyncing ? "SYNCING..." : "SYNC NODES"}</span>
           </button>
@@ -401,28 +401,29 @@ export default function HomePage() {
       </header>
 
       {/* MAIN VIEWPORT BODY */}
-      <main className="relative mx-auto flex w-full max-w-[1700px] flex-1 flex-col space-y-6 overflow-hidden p-6 lg:p-8">
-        {/* Quick Action Navigation Cards Grid */}
-        <div className="grid shrink-0 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5">
+      <main className="mx-auto flex w-full max-w-[1700px] flex-1 flex-col space-y-6 p-4 sm:p-6 lg:p-8">
+        
+        {/* Quick Action Navigation Cards */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
           <Link
             href="/pos"
             onClick={() =>
               pushTelemetry("NAV", "Navigated to POS Terminal (/pos)")
             }
-            className="group relative overflow-hidden rounded-2xl border border-white/5 bg-[#0E1526]/80 p-4 shadow-xl backdrop-blur-xl transition hover:border-indigo-500/30 hover:bg-[#121B32]"
+            className="group relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-lg backdrop-blur-xl transition hover:border-cyan-500/50 hover:bg-slate-900"
           >
             <div className="flex items-center justify-between">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-500/30 bg-cyan-950/60 text-cyan-400">
                 <ShoppingCart className="h-4 w-4" />
               </div>
-              <ArrowUpRight className="h-4 w-4 text-slate-500 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-indigo-400" />
+              <ArrowUpRight className="h-4 w-4 text-slate-500 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-cyan-400" />
             </div>
             <div className="mt-3">
               <div className="text-xs font-bold tracking-wider text-white uppercase">
                 POS Terminal
               </div>
               <p className="mt-0.5 text-[11px] text-slate-400">
-                Execute sales, manage cart items & checkout
+                Execute sales & checkout cart items
               </p>
             </div>
           </Link>
@@ -432,20 +433,20 @@ export default function HomePage() {
             onClick={() =>
               pushTelemetry("NAV", "Navigated to Inventory Matrix (/inventory)")
             }
-            className="group relative overflow-hidden rounded-2xl border border-white/5 bg-[#0E1526]/80 p-4 shadow-xl backdrop-blur-xl transition hover:border-indigo-500/30 hover:bg-[#121B32]"
+            className="group relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-lg backdrop-blur-xl transition hover:border-cyan-500/50 hover:bg-slate-900"
           >
             <div className="flex items-center justify-between">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-500/30 bg-cyan-950/60 text-cyan-400">
                 <Package className="h-4 w-4" />
               </div>
-              <ArrowUpRight className="h-4 w-4 text-slate-500 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-indigo-400" />
+              <ArrowUpRight className="h-4 w-4 text-slate-500 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-cyan-400" />
             </div>
             <div className="mt-3">
               <div className="text-xs font-bold tracking-wider text-white uppercase">
                 Inventory Matrix
               </div>
               <p className="mt-0.5 text-[11px] text-slate-400">
-                Manage SKUs, stock levels, and pricing data
+                Manage SKUs and stock levels
               </p>
             </div>
           </Link>
@@ -458,20 +459,20 @@ export default function HomePage() {
                 "Navigated to Promotions Manager (/manager/promotions)",
               )
             }
-            className="group relative overflow-hidden rounded-2xl border border-white/5 bg-[#0E1526]/80 p-4 shadow-xl backdrop-blur-xl transition hover:border-indigo-500/30 hover:bg-[#121B32]"
+            className="group relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-lg backdrop-blur-xl transition hover:border-cyan-500/50 hover:bg-slate-900"
           >
             <div className="flex items-center justify-between">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-500/30 bg-cyan-950/60 text-cyan-400">
                 <Tag className="h-4 w-4" />
               </div>
-              <ArrowUpRight className="h-4 w-4 text-slate-500 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-indigo-400" />
+              <ArrowUpRight className="h-4 w-4 text-slate-500 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-cyan-400" />
             </div>
             <div className="mt-3">
               <div className="text-xs font-bold tracking-wider text-white uppercase">
                 Promotions Engine
               </div>
               <p className="mt-0.5 text-[11px] text-slate-400">
-                Configure bundle specials & discount rules
+                Configure discounts & bundles
               </p>
             </div>
           </Link>
@@ -481,20 +482,20 @@ export default function HomePage() {
             onClick={() =>
               pushTelemetry("NAV", "Navigated to Cash Drawer (/cash)")
             }
-            className="group relative overflow-hidden rounded-2xl border border-white/5 bg-[#0E1526]/80 p-4 shadow-xl backdrop-blur-xl transition hover:border-indigo-500/30 hover:bg-[#121B32]"
+            className="group relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-lg backdrop-blur-xl transition hover:border-cyan-500/50 hover:bg-slate-900"
           >
             <div className="flex items-center justify-between">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-500/30 bg-cyan-950/60 text-cyan-400">
                 <DollarSign className="h-4 w-4" />
               </div>
-              <ArrowUpRight className="h-4 w-4 text-slate-500 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-indigo-400" />
+              <ArrowUpRight className="h-4 w-4 text-slate-500 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-cyan-400" />
             </div>
             <div className="mt-3">
               <div className="text-xs font-bold tracking-wider text-white uppercase">
                 Cash Drawer
               </div>
               <p className="mt-0.5 text-[11px] text-slate-400">
-                Till audits, cash drops, and float adjustments
+                Till audits & float adjustments
               </p>
             </div>
           </Link>
@@ -504,97 +505,99 @@ export default function HomePage() {
             onClick={() =>
               pushTelemetry("NAV", "Navigated to Database Nodes (/database)")
             }
-            className="group relative overflow-hidden rounded-2xl border border-white/5 bg-[#0E1526]/80 p-4 shadow-xl backdrop-blur-xl transition hover:border-indigo-500/30 hover:bg-[#121B32]"
+            className="group relative overflow-hidden rounded-2xl border border-slate-800 bg-slate-900/70 p-4 shadow-lg backdrop-blur-xl transition hover:border-cyan-500/50 hover:bg-slate-900"
           >
             <div className="flex items-center justify-between">
-              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-cyan-500/30 bg-cyan-950/60 text-cyan-400">
                 <Database className="h-4 w-4" />
               </div>
-              <ArrowUpRight className="h-4 w-4 text-slate-500 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-indigo-400" />
+              <ArrowUpRight className="h-4 w-4 text-slate-500 transition group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-cyan-400" />
             </div>
             <div className="mt-3">
               <div className="text-xs font-bold tracking-wider text-white uppercase">
                 Database Nodes
               </div>
               <p className="mt-0.5 text-[11px] text-slate-400">
-                Inspect cluster health and prisma cluster status
+                Inspect Supabase status
               </p>
             </div>
           </Link>
         </div>
 
-        {/* Core Metrics Matrix Grid */}
-        <div className="grid shrink-0 grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <div className="space-y-1.5 rounded-2xl border border-white/5 bg-[#0E1526]/80 p-4 shadow-xl backdrop-blur-xl">
-            <div className="flex items-center justify-between text-xs text-slate-400">
+        {/* Core Metrics Grid */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="space-y-1.5 rounded-2xl border border-slate-800 bg-slate-900/80 p-4 shadow-md backdrop-blur-xl">
+            <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
               <span>Till Liquidity</span>
-              <DollarSign className="h-4 w-4 text-indigo-400" />
+              <DollarSign className="h-4 w-4 text-cyan-400" />
             </div>
-            <p className="text-2xl font-bold text-white">
+            <p className="text-2xl font-black text-white">
               {cashLoading
                 ? "..."
                 : `R${(cashSummary?.balance ?? 0).toFixed(2)}`}
             </p>
-            <p className="text-[10px] text-slate-500">
+            <p className="text-[10px] text-slate-500 font-bold">
               In: +R{(cashSummary?.totalIn ?? 0).toFixed(2)} | Out: -R
               {(cashSummary?.totalOut ?? 0).toFixed(2)}
             </p>
           </div>
 
-          <div className="space-y-1.5 rounded-2xl border border-white/5 bg-[#0E1526]/80 p-4 shadow-xl backdrop-blur-xl">
-            <div className="flex items-center justify-between text-xs text-slate-400">
+          <div className="space-y-1.5 rounded-2xl border border-slate-800 bg-slate-900/80 p-4 shadow-md backdrop-blur-xl">
+            <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
               <span>Asset Valuation</span>
-              <Zap className="h-4 w-4 text-indigo-400" />
+              <Zap className="h-4 w-4 text-cyan-400" />
             </div>
-            <p className="text-2xl font-bold text-white">
+            <p className="text-2xl font-black text-white">
               {productsLoading ? "..." : `R${totalValuation.toFixed(2)}`}
             </p>
-            <p className="text-[10px] text-slate-500">
+            <p className="text-[10px] text-slate-500 font-bold">
               Calculated across {totalProducts} indexed SKUs
             </p>
           </div>
 
-          <div className="space-y-1.5 rounded-2xl border border-white/5 bg-[#0E1526]/80 p-4 shadow-xl backdrop-blur-xl">
-            <div className="flex items-center justify-between text-xs text-slate-400">
+          <div className="space-y-1.5 rounded-2xl border border-slate-800 bg-slate-900/80 p-4 shadow-md backdrop-blur-xl">
+            <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
               <span>Active Promotions</span>
-              <Tag className="h-4 w-4 text-indigo-400" />
+              <Tag className="h-4 w-4 text-cyan-400" />
             </div>
-            <p className="text-2xl font-bold text-white">{totalPromotions}</p>
-            <p className="text-[10px] text-slate-500">
+            <p className="text-2xl font-black text-white">{totalPromotions}</p>
+            <p className="text-[10px] text-slate-500 font-bold">
               Bundle rules active in register
             </p>
           </div>
 
-          <div className="space-y-1.5 rounded-2xl border border-white/5 bg-[#0E1526]/80 p-4 shadow-xl backdrop-blur-xl">
-            <div className="flex items-center justify-between text-xs text-slate-400">
+          <div className="space-y-1.5 rounded-2xl border border-slate-800 bg-slate-900/80 p-4 shadow-md backdrop-blur-xl">
+            <div className="flex items-center justify-between text-xs text-slate-400 font-semibold">
               <span>Stock Anomalies</span>
               <ShieldAlert className="h-4 w-4 text-rose-400" />
             </div>
             <p
-              className={`text-2xl font-bold ${lowStockCount > 0 ? "text-rose-400" : "text-emerald-400"}`}
+              className={`text-2xl font-black ${lowStockCount > 0 ? "text-rose-400" : "text-emerald-400"}`}
             >
               {productsLoading ? "..." : lowStockCount}
             </p>
-            <p className="text-[10px] text-slate-500">
+            <p className="text-[10px] text-slate-500 font-bold">
               {lowStockCount > 0
-                ? "Action required: Threshold breached"
-                : "All nodes within safe margins"}
+                ? "Low stock threshold reached"
+                : "All SKUs within safe margins"}
             </p>
           </div>
         </div>
 
-        {/* Lower Grid: Telemetry Stream & Inventory Sub-Matrix */}
-        <div className="grid min-h-0 w-full flex-1 grid-cols-1 gap-6 overflow-hidden xl:grid-cols-3">
-          <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-white/5 bg-[#0E1526]/80 p-5 shadow-xl backdrop-blur-xl xl:col-span-1">
-            <div className="flex shrink-0 items-center justify-between border-b border-white/5 pb-3">
+        {/* Lower Section: Telemetry & Inventory Split */}
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          
+          {/* Telemetry Log Feed */}
+          <div className="flex flex-col h-[500px] rounded-2xl border border-slate-800 bg-slate-900/80 p-5 shadow-xl backdrop-blur-xl lg:col-span-1">
+            <div className="flex shrink-0 items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2 text-xs font-bold tracking-wider text-white uppercase">
-                <Terminal className="h-4 w-4 text-indigo-400" />
-                <span>Neural Telemetry Stream</span>
+                <Terminal className="h-4 w-4 text-cyan-400" />
+                <span>Neural Telemetry</span>
               </div>
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => clearTelemetry()}
-                  title="Clear Log Buffer"
+                  title="Clear Telemetry Log Buffer"
                   className="cursor-pointer p-1 text-slate-500 transition hover:text-rose-400"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
@@ -604,7 +607,7 @@ export default function HomePage() {
             </div>
 
             <div className="my-2.5 flex shrink-0 items-center justify-between gap-2 overflow-x-auto pb-1 text-[10px] font-bold">
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1">
                 <Filter className="h-3 w-3 shrink-0 text-slate-500" />
                 {["ALL", "NAV", "CLICK", "API", "SYS"].map((type) => (
                   <button
@@ -612,8 +615,8 @@ export default function HomePage() {
                     onClick={() => setFilterType(type)}
                     className={`cursor-pointer rounded-lg border px-2 py-0.5 transition ${
                       filterType === type
-                        ? "border-indigo-500 bg-indigo-600 text-white shadow-md shadow-indigo-600/20"
-                        : "border-white/5 bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white"
+                        ? "border-cyan-500/60 bg-cyan-500/20 text-cyan-200"
+                        : "border-slate-800 bg-slate-950/60 text-slate-400 hover:text-white"
                     }`}
                   >
                     {type}
@@ -627,25 +630,24 @@ export default function HomePage() {
                     prev === "latest" ? "oldest" : "latest",
                   )
                 }
-                className="flex shrink-0 cursor-pointer items-center gap-1 rounded-lg border border-white/10 bg-white/5 px-2.5 py-0.5 text-slate-300 transition hover:bg-white/10 hover:text-white"
-                title="Toggle Action Time Sort Order"
+                className="flex shrink-0 cursor-pointer items-center gap-1 rounded-lg border border-slate-800 bg-slate-950/60 px-2 py-0.5 text-slate-300 transition hover:text-white"
               >
-                <ArrowUpDown className="h-3 w-3 text-indigo-400" />
+                <ArrowUpDown className="h-3 w-3 text-cyan-400" />
                 <span>{sortOrder === "latest" ? "LATEST" : "OLDEST"}</span>
               </button>
             </div>
 
-            <div className="mt-1 flex-1 space-y-2 overflow-y-auto pr-1.5 font-mono text-xs text-slate-300 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-track]:bg-white/5">
+            <div className="flex-1 space-y-2 overflow-y-auto pr-1 text-xs text-slate-300 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-700">
               {filteredLogs.length > 0 ? (
                 filteredLogs.map((log) => {
                   const badgeColor =
                     log.type === "NAV"
-                      ? "text-purple-400 border-purple-500/20 bg-purple-500/10"
+                      ? "text-purple-400 border-purple-500/30 bg-purple-950/30"
                       : log.type === "CLICK"
-                        ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/10"
+                        ? "text-emerald-400 border-emerald-500/30 bg-emerald-950/30"
                         : log.type === "API"
-                          ? "text-blue-400 border-blue-500/20 bg-blue-500/10"
-                          : "text-indigo-400 border-indigo-500/20 bg-indigo-500/10";
+                          ? "text-blue-400 border-blue-500/30 bg-blue-950/30"
+                          : "text-cyan-400 border-cyan-500/30 bg-cyan-950/30";
 
                   const LogIcon =
                     log.type === "NAV"
@@ -659,23 +661,20 @@ export default function HomePage() {
                   return (
                     <div
                       key={log.id}
-                      className="flex flex-col gap-1.5 rounded-r-xl border-y border-r border-l-2 border-indigo-500/50 border-white/5 bg-[#070A12] py-2 pl-3 shadow-inner"
+                      className="flex flex-col gap-1 rounded-xl border border-slate-800 bg-slate-950/80 p-2.5 shadow-inner"
                     >
-                      <div className="flex items-center justify-between text-[10px] font-bold text-slate-400">
+                      <div className="flex items-center justify-between text-[10px] font-bold">
                         <span
-                          className={`inline-flex items-center gap-1 rounded border px-2 py-0.5 text-[9px] font-bold uppercase ${badgeColor}`}
+                          className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 ${badgeColor}`}
                         >
                           <LogIcon className="h-2.5 w-2.5" />
                           {log.type}
                         </span>
-                        <span
-                          className="font-semibold tracking-wide text-slate-400"
-                          title={log.timestamp}
-                        >
+                        <span className="text-slate-500 font-semibold">
                           {getRelativeTime(log.timestamp)}
                         </span>
                       </div>
-                      <span className="text-xs leading-relaxed break-all text-slate-200">
+                      <span className="text-xs break-all text-slate-300 mt-1 font-mono">
                         {log.message}
                       </span>
                     </div>
@@ -683,24 +682,25 @@ export default function HomePage() {
                 })
               ) : (
                 <div className="py-12 text-center text-xs text-slate-500">
-                  No telemetry signals matching filter criteria.
+                  No telemetry signals matching criteria.
                 </div>
               )}
             </div>
 
-            <div className="mt-3 flex shrink-0 items-center justify-between border-t border-white/5 pt-2.5 text-[11px] font-bold text-slate-500">
+            <div className="mt-3 flex shrink-0 items-center justify-between border-t border-slate-800 pt-2.5 text-[10px] font-bold text-slate-500 uppercase">
               <span className="flex items-center gap-1.5">
                 <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" />
-                PERSISTENT SESSION ACTIVE
+                SESSION ACTIVE
               </span>
-              <span>BUFFER: {logs.length}</span>
+              <span>LOGS: {logs.length}</span>
             </div>
           </div>
 
-          <div className="flex h-full min-h-0 flex-col space-y-3 overflow-hidden rounded-2xl border border-white/5 bg-[#0E1526]/80 p-5 shadow-xl backdrop-blur-xl xl:col-span-2">
-            <div className="flex shrink-0 items-center justify-between border-b border-white/5 pb-3">
+          {/* Sub-Matrix Inventory Overview */}
+          <div className="flex flex-col h-[500px] rounded-2xl border border-slate-800 bg-slate-900/80 p-5 shadow-xl backdrop-blur-xl lg:col-span-2">
+            <div className="flex shrink-0 items-center justify-between border-b border-slate-800 pb-3">
               <div className="flex items-center gap-2">
-                <Layers className="h-4 w-4 text-indigo-400" />
+                <Layers className="h-4 w-4 text-cyan-400" />
                 <h2 className="text-xs font-bold tracking-wider text-white uppercase">
                   Live Inventory Sub-Matrix
                 </h2>
@@ -710,33 +710,33 @@ export default function HomePage() {
                 onClick={() =>
                   pushTelemetry(
                     "NAV",
-                    "Redirected to full Inventory Matrix from dashboard",
+                    "Redirected to full Inventory Matrix from homepage",
                   )
                 }
-                className="text-xs font-bold text-indigo-400 transition hover:text-indigo-300"
+                className="text-xs font-bold text-cyan-400 transition hover:text-cyan-300"
               >
                 View Full Matrix &rarr;
               </Link>
             </div>
 
-            <div className="flex-1 overflow-y-auto pr-1 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-white/20 [&::-webkit-scrollbar-track]:bg-white/5">
+            <div className="flex-1 overflow-y-auto pr-1 [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-700">
               <table className="w-full text-left text-xs text-slate-300">
-                <thead className="sticky top-0 z-10 border-b border-white/5 bg-[#0E1526] text-[10px] font-semibold text-slate-500 uppercase">
+                <thead className="sticky top-0 z-10 border-b border-slate-800 bg-slate-900 text-[10px] font-bold text-slate-500 uppercase">
                   <tr>
-                    <th className="px-3 pb-3">Asset Designation</th>
-                    <th className="px-3 pb-3">SKU Hash</th>
-                    <th className="px-3 pb-3">Unit Value</th>
-                    <th className="px-3 pb-3">Stock Node</th>
+                    <th className="px-3 pb-3">Product Name</th>
+                    <th className="px-3 pb-3">SKU</th>
+                    <th className="px-3 pb-3">Unit Price</th>
+                    <th className="px-3 pb-3">Stock Level</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className="divide-y divide-slate-800/60">
                   {productsLoading ? (
                     <tr>
                       <td
                         colSpan={4}
-                        className="py-12 text-center text-xs text-indigo-400"
+                        className="py-12 text-center text-xs text-cyan-400 font-semibold"
                       >
-                        Querying cluster database...
+                        Querying database records...
                       </td>
                     </tr>
                   ) : products && products.length > 0 ? (
@@ -749,12 +749,12 @@ export default function HomePage() {
                             `Inspected asset node [SKU: ${product.sku}] - ${product.name}`,
                           )
                         }
-                        className="cursor-pointer transition hover:bg-white/[0.02]"
+                        className="cursor-pointer transition hover:bg-slate-800/50"
                       >
                         <td className="px-3 py-3 font-bold text-white">
                           {product.name}
                         </td>
-                        <td className="px-3 py-3 font-mono text-indigo-400">
+                        <td className="px-3 py-3 font-mono text-cyan-400">
                           {product.sku}
                         </td>
                         <td className="px-3 py-3 font-semibold text-slate-200">
@@ -764,8 +764,8 @@ export default function HomePage() {
                           <span
                             className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-[10px] font-bold ${
                               product.stockQty < 5
-                                ? "border-rose-500/20 bg-rose-500/10 text-rose-400"
-                                : "border-emerald-500/20 bg-emerald-500/10 text-emerald-400"
+                                ? "border-rose-500/30 bg-rose-950/30 text-rose-400"
+                                : "border-emerald-500/30 bg-emerald-950/30 text-emerald-400"
                             }`}
                           >
                             {product.stockQty} UNITS
@@ -779,7 +779,7 @@ export default function HomePage() {
                         colSpan={4}
                         className="py-12 text-center text-xs text-slate-500"
                       >
-                        No assets detected in current sector.
+                        No active stock entries found.
                       </td>
                     </tr>
                   )}
@@ -790,7 +790,7 @@ export default function HomePage() {
         </div>
       </main>
 
-      {/* NAVIGATION DRAWER */}
+      {/* QUICK SYSTEM NAVIGATION DRAWER */}
       <AnimatePresence mode="wait">
         {isNavOpen && (
           <div className="pointer-events-auto fixed inset-0 z-[100]">
@@ -799,7 +799,7 @@ export default function HomePage() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setIsNavOpen(false)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+              className="absolute inset-0 bg-slate-950/80 backdrop-blur-md"
             />
 
             <motion.div
@@ -807,53 +807,53 @@ export default function HomePage() {
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", damping: 28, stiffness: 220 }}
-              className="absolute inset-y-0 left-0 z-10 flex w-80 flex-col justify-between border-r border-white/10 bg-[#0A0E1A] p-6 shadow-2xl"
+              className="absolute inset-y-0 left-0 z-10 flex w-80 flex-col justify-between border-r border-slate-800 bg-slate-900 p-6 shadow-2xl font-mono"
             >
               <div>
-                <div className="mb-6 flex items-center justify-between border-b border-white/5 pb-5">
+                <div className="mb-6 flex items-center justify-between border-b border-slate-800 pb-4">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400 shadow-inner">
-                      <Terminal className="h-4 w-4" />
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-cyan-500/40 bg-cyan-950/60 text-cyan-400 shadow-inner">
+                      <Terminal className="h-5 w-5" />
                     </div>
                     <div>
-                      <h2 className="text-xs font-bold tracking-wider text-white uppercase">
+                      <h2 className="text-xs font-black tracking-widest text-white uppercase">
                         APEX_OS
                       </h2>
-                      <p className="text-[11px] text-slate-400">
-                        Navigation Hub
+                      <p className="text-[10px] text-slate-400 font-semibold">
+                        QUICK NAV DRAWER
                       </p>
                     </div>
                   </div>
                   <button
                     type="button"
                     onClick={() => setIsNavOpen(false)}
-                    className="cursor-pointer rounded-xl p-2 text-slate-400 transition hover:bg-white/5 hover:text-white"
+                    className="cursor-pointer rounded-xl p-2 text-slate-400 transition hover:bg-slate-800 hover:text-white"
                   >
                     <X className="h-5 w-5" />
                   </button>
                 </div>
 
-                <nav className="space-y-2 text-xs">
+                <nav className="space-y-2 text-xs font-bold">
                   <Link
                     href="/"
                     onClick={() => setIsNavOpen(false)}
-                    className="flex cursor-pointer items-center justify-between rounded-xl border border-indigo-500/30 bg-indigo-600/15 px-4 py-3 font-semibold text-white shadow-sm transition"
+                    className="flex cursor-pointer items-center justify-between rounded-xl border border-cyan-500/50 bg-cyan-500/20 px-4 py-3 text-cyan-200 shadow-sm transition"
                   >
                     <div className="flex items-center gap-3">
-                      <Home className="h-4 w-4 text-indigo-400" />
+                      <Home className="h-4 w-4 text-cyan-400" />
                       <span>Command Center</span>
                     </div>
-                    <ChevronRight className="h-4 w-4 text-indigo-400" />
+                    <ChevronRight className="h-4 w-4 text-cyan-400" />
                   </Link>
 
                   <Link
                     href="/pos"
                     onClick={() => setIsNavOpen(false)}
-                    className="group flex cursor-pointer items-center justify-between rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3 text-slate-300 transition hover:border-white/10 hover:bg-white/5 hover:text-white"
+                    className="group flex cursor-pointer items-center justify-between rounded-xl border border-slate-800 bg-slate-950/60 px-4 py-3 text-slate-300 transition hover:border-slate-700 hover:text-white"
                   >
                     <div className="flex items-center gap-3">
-                      <ShoppingCart className="h-4 w-4 text-slate-400 transition group-hover:text-indigo-400" />
-                      <span className="font-medium">POS Terminal</span>
+                      <ShoppingCart className="h-4 w-4 text-slate-400 transition group-hover:text-cyan-400" />
+                      <span>POS Terminal</span>
                     </div>
                     <ChevronRight className="h-4 w-4 text-slate-600 transition-transform group-hover:translate-x-0.5" />
                   </Link>
@@ -861,11 +861,11 @@ export default function HomePage() {
                   <Link
                     href="/inventory"
                     onClick={() => setIsNavOpen(false)}
-                    className="group flex cursor-pointer items-center justify-between rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3 text-slate-300 transition hover:border-white/10 hover:bg-white/5 hover:text-white"
+                    className="group flex cursor-pointer items-center justify-between rounded-xl border border-slate-800 bg-slate-950/60 px-4 py-3 text-slate-300 transition hover:border-slate-700 hover:text-white"
                   >
                     <div className="flex items-center gap-3">
-                      <Layers className="h-4 w-4 text-slate-400 transition group-hover:text-indigo-400" />
-                      <span className="font-medium">Inventory Matrix</span>
+                      <Layers className="h-4 w-4 text-slate-400 transition group-hover:text-cyan-400" />
+                      <span>Inventory Matrix</span>
                     </div>
                     <ChevronRight className="h-4 w-4 text-slate-600 transition-transform group-hover:translate-x-0.5" />
                   </Link>
@@ -873,11 +873,11 @@ export default function HomePage() {
                   <Link
                     href="/manager/promotions"
                     onClick={() => setIsNavOpen(false)}
-                    className="group flex cursor-pointer items-center justify-between rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3 text-slate-300 transition hover:border-white/10 hover:bg-white/5 hover:text-white"
+                    className="group flex cursor-pointer items-center justify-between rounded-xl border border-slate-800 bg-slate-950/60 px-4 py-3 text-slate-300 transition hover:border-slate-700 hover:text-white"
                   >
                     <div className="flex items-center gap-3">
-                      <Tag className="h-4 w-4 text-slate-400 transition group-hover:text-indigo-400" />
-                      <span className="font-medium">Promotions Manager</span>
+                      <Tag className="h-4 w-4 text-slate-400 transition group-hover:text-cyan-400" />
+                      <span>Promotions Manager</span>
                     </div>
                     <ChevronRight className="h-4 w-4 text-slate-600 transition-transform group-hover:translate-x-0.5" />
                   </Link>
@@ -885,11 +885,11 @@ export default function HomePage() {
                   <Link
                     href="/cash"
                     onClick={() => setIsNavOpen(false)}
-                    className="group flex cursor-pointer items-center justify-between rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3 text-slate-300 transition hover:border-white/10 hover:bg-white/5 hover:text-white"
+                    className="group flex cursor-pointer items-center justify-between rounded-xl border border-slate-800 bg-slate-950/60 px-4 py-3 text-slate-300 transition hover:border-slate-700 hover:text-white"
                   >
                     <div className="flex items-center gap-3">
-                      <DollarSign className="h-4 w-4 text-slate-400 transition group-hover:text-indigo-400" />
-                      <span className="font-medium">Cash Drawer</span>
+                      <DollarSign className="h-4 w-4 text-slate-400 transition group-hover:text-cyan-400" />
+                      <span>Cash Drawer</span>
                     </div>
                     <ChevronRight className="h-4 w-4 text-slate-600 transition-transform group-hover:translate-x-0.5" />
                   </Link>
@@ -897,11 +897,11 @@ export default function HomePage() {
                   <Link
                     href="/analytics"
                     onClick={() => setIsNavOpen(false)}
-                    className="group flex cursor-pointer items-center justify-between rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3 text-slate-300 transition hover:border-white/10 hover:bg-white/5 hover:text-white"
+                    className="group flex cursor-pointer items-center justify-between rounded-xl border border-slate-800 bg-slate-950/60 px-4 py-3 text-slate-300 transition hover:border-slate-700 hover:text-white"
                   >
                     <div className="flex items-center gap-3">
-                      <BarChart3 className="h-4 w-4 text-slate-400 transition group-hover:text-indigo-400" />
-                      <span className="font-medium">Sales Analytics</span>
+                      <BarChart3 className="h-4 w-4 text-slate-400 transition group-hover:text-cyan-400" />
+                      <span>Sales Analytics</span>
                     </div>
                     <ChevronRight className="h-4 w-4 text-slate-600 transition-transform group-hover:translate-x-0.5" />
                   </Link>
@@ -909,18 +909,20 @@ export default function HomePage() {
                   <Link
                     href="/database"
                     onClick={() => setIsNavOpen(false)}
-                    className="group flex cursor-pointer items-center justify-between rounded-xl border border-white/5 bg-white/[0.02] px-4 py-3 text-slate-300 transition hover:border-white/10 hover:bg-white/5 hover:text-white"
+                    className="group flex cursor-pointer items-center justify-between rounded-xl border border-slate-800 bg-slate-950/60 px-4 py-3 text-slate-300 transition hover:border-slate-700 hover:text-white"
                   >
                     <div className="flex items-center gap-3">
-                      <Database className="h-4 w-4 text-slate-400 transition group-hover:text-indigo-400" />
-                      <span className="font-medium">Database Nodes</span>
+                      <Database className="h-4 w-4 text-slate-400 transition group-hover:text-cyan-400" />
+                      <span>Database Nodes</span>
                     </div>
                     <ChevronRight className="h-4 w-4 text-slate-600 transition-transform group-hover:translate-x-0.5" />
                   </Link>
                 </nav>
               </div>
 
-              <div className="border-t border-white/5 pt-4 text-[11px]"></div>
+              <div className="border-t border-slate-800 pt-4 text-[10px] text-slate-500 font-semibold uppercase">
+                APEXOS T3 ENGINE v2.4
+              </div>
             </motion.div>
           </div>
         )}
