@@ -9,6 +9,7 @@ export function StockJournal() {
   // Form state for adding products
   const [name, setName] = useState("");
   const [sku, setSku] = useState("");
+  const [costPrice, setCostPrice] = useState("");
   const [price, setPrice] = useState("");
   const [stockQty, setStockQty] = useState("");
 
@@ -19,6 +20,7 @@ export function StockJournal() {
     onSuccess: async () => {
       setName("");
       setSku("");
+      setCostPrice("");
       setPrice("");
       setStockQty("");
       await utils.product.getAll.invalidate();
@@ -39,11 +41,12 @@ export function StockJournal() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !sku || !price || !stockQty) return;
+    if (!name || !sku || !costPrice || !price || !stockQty) return;
 
     createProduct.mutate({
       name,
       sku,
+      costPrice: parseFloat(costPrice),
       price: parseFloat(price),
       stockQty: parseInt(stockQty, 10),
     });
@@ -54,7 +57,7 @@ export function StockJournal() {
       {/* Product Creation Form */}
       <div className="rounded-xl border border-slate-800 bg-slate-900 p-6">
         <h2 className="mb-4 text-xl font-bold text-white">Add New Product</h2>
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-5">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-6">
           <input
             type="text"
             placeholder="Product Name"
@@ -74,7 +77,16 @@ export function StockJournal() {
           <input
             type="number"
             step="0.01"
-            placeholder="Price ($)"
+            placeholder="Cost Price ($)"
+            value={costPrice}
+            onChange={(e) => setCostPrice(e.target.value)}
+            className="rounded bg-slate-800 p-2.5 text-sm text-white border border-slate-700 focus:outline-none focus:border-blue-500"
+            required
+          />
+          <input
+            type="number"
+            step="0.01"
+            placeholder="Selling Price ($)"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
             className="rounded bg-slate-800 p-2.5 text-sm text-white border border-slate-700 focus:outline-none focus:border-blue-500"
@@ -112,7 +124,8 @@ export function StockJournal() {
                 <tr>
                   <th className="px-4 py-3">SKU</th>
                   <th className="px-4 py-3">Name</th>
-                  <th className="px-4 py-3">Price</th>
+                  <th className="px-4 py-3">Cost Price</th>
+                  <th className="px-4 py-3">Selling Price</th>
                   <th className="px-4 py-3">Stock Quantity</th>
                   <th className="px-4 py-3">Actions</th>
                 </tr>
@@ -122,6 +135,7 @@ export function StockJournal() {
                   <tr key={item.id} className="hover:bg-slate-800/50">
                     <td className="px-4 py-3 font-mono text-slate-400">{item.sku}</td>
                     <td className="px-4 py-3 font-medium text-white">{item.name}</td>
+                    <td className="px-4 py-3">${item.costPrice?.toFixed(2) ?? "0.00"}</td>
                     <td className="px-4 py-3">${item.price.toFixed(2)}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
