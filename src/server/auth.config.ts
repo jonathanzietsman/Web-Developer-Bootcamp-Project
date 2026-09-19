@@ -5,7 +5,7 @@ export const authConfig = {
     // Keep provider definitions here, but DO NOT import Prisma or adapters
   ],
   pages: {
-    signIn: "/login",
+    // signIn: "/login",
   },
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {

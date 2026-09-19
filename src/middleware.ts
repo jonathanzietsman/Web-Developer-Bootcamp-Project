@@ -5,7 +5,7 @@ export default NextAuth(authConfig).auth;
 
 export const config = {
   matcher: [
-    "/",
+    // "/",
     "/pos/:path*",
     "/cash/:path*",
     "/products/:path*",
