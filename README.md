@@ -44,6 +44,8 @@
 14. [Telemetry & Observability](#14--telemetry--observability)
 15. [Test Scenarios](#15--test-scenarios)
 16. [Success Metrics](#16--success-metrics)
+17. [User Guide](#17--user-guide)
+18. [Technical Design](#18--technical-design)
 
 ---
 
@@ -497,6 +499,430 @@ Every meaningful step emits a structured telemetry event via `pushTelemetry(type
 | 🔐 **Auth coverage** | `100%` of sales | Every sale must map to a known operator |
 | 📡 **Telemetry coverage** | `100%` of checkout events | Enables full auditability and debugging |
 | 🚫 **Partial-failure rate** | `0%` *(post-transaction refactor)* | Current risk until `sale.create` ships |
+
+---
+
+## 17 · User Guide
+
+> **Audience:** Cashiers and store operators using the POS Terminal day to day.
+> **Goal:** Ring up a customer, apply savings, take payment, and finish the sale, quickly and correctly.
+
+### 17.1 · Quick Start
+
+1. **Sign in** with your operator account.
+2. Open the **POS Terminal** (`/pos`).
+3. **Search** for a product and **tap** it to add it to the cart.
+4. Check the **quantity** and the **total**.
+5. Choose **CASH** or **CARD**.
+6. Tap **Complete Checkout**. When the green success banner appears, the sale is done.
+
+### 17.2 · Know Your Screen
+
+| Area | Where | What it does |
+|---|---|---|
+| **Search bar** | Top left | Filters products by name or SKU as you type. |
+| **Product grid** | Left | Tap a card to add that product to the cart. Each card shows price and stock remaining. |
+| **Active Cart Ledger** | Right | Lists items, quantities, and a 🗑 remove button per line. |
+| **Payment selector** | Right | Switch between 💵 CASH and 💳 CARD. |
+| **Discount selector** | Right | Pick `0%`, `5%`, `10%`, or `15%`. |
+| **Totals** | Right | Shows subtotal, bundle savings, discount, and the final total. |
+| **Complete Checkout** | Bottom right | Commits the sale. Disabled when the cart is empty. |
+
+### 17.3 · Ringing Up a Sale
+
+#### Add items
+
+- Type part of a product **name** or **SKU** in the search bar (capitals don't matter).
+- Tap the product card. Tapping the same product again adds one more.
+- A card marked **OUT OF STOCK** is greyed out and cannot be added.
+
+#### Change quantities
+
+- Use **`+`** and **`−`** on a cart line.
+- The quantity **stops at the stock available**. If `+` does nothing, there is no more stock to sell.
+- Tap **🗑** to remove a line entirely.
+
+#### Bundle savings
+
+Some products qualify for **bundle deals** (for example, "buy 2 gummies for R200"). You don't need to do anything:
+
+- The system detects qualifying items automatically.
+- A green **Bundle** line appears with the amount saved.
+- Multiple bundles can apply to the same cart, and the savings add up.
+
+#### Apply a discount (optional)
+
+- Pick a tier: **0%**, **5%**, **10%**, or **15%**.
+- The discount is taken **after** bundle savings.
+- Only these four tiers are available. Larger discounts will need manager approval in a future release.
+
+#### Take payment
+
+- Select **CASH** or **CARD** before checking out.
+- Collect the money or run the card **as normal**. The POS records the sale but does not process card payments itself.
+- No tax is added; the total shown is the amount to charge (in Rand, **R**).
+
+#### Complete the sale
+
+1. Confirm the **TOTAL**.
+2. Tap **✅ Complete Checkout**.
+3. Wait for the **success banner** (about 1.5 seconds). The cart clears automatically.
+4. The register is ready for the next customer.
+
+### 17.4 · Worked Example
+
+A customer buys **3 × Hydro Gummies (R120 each)** and **2 × Sparkling Water (R25 each)**. There is a "2 gummies for R200" bundle, and you give a 10% discount.
+
+| Line | Amount |
+|---|---:|
+| Subtotal | R410.00 |
+| Bundle savings (1 bundle) | −R40.00 |
+| 10% discount on R370 | −R37.00 |
+| **Total to charge** | **R333.00** |
+
+### 17.5 · Troubleshooting
+
+| What you see | Likely reason | What to do |
+|---|---|---|
+| Product card is grey with an **OUT OF STOCK** badge | Stock is 0 | Can't be sold. Ask a manager to update inventory if stock exists on the shelf. |
+| `+` button does nothing | Cart quantity has reached available stock | Expected behavior. Reduce the customer's request or check stock. |
+| **Complete Checkout** is greyed out | Cart is empty | Add at least one item. |
+| Expected bundle savings don't show | Not enough matching items, or no active rule | Check the bundle's required quantity. Ask a manager if the promotion is active. |
+| Searching finds nothing | Typo or item not in catalog | Try a shorter search, or search by SKU. |
+| **ERROR: TRANSACTION ABORTED** | A step of the checkout failed | Your cart is kept. **Before retrying**, see the note below. |
+| Page shows a sign-in screen | Session expired | Sign in again. |
+
+> [!IMPORTANT]
+> **After a failed checkout, check before you retry.** In the current version some steps may have already saved (for example, stock reduced or a ledger entry written) before the error occurred. Ask a manager to review the **Cash** ledger and the item's stock level so the same sale isn't recorded twice.
+
+### 17.6 · Tips for Speed
+
+- Search by **SKU** (or a scanner code, if your store uses SKU labels) for the fewest taps.
+- Set **payment method** and **discount** before tapping checkout; you can't change them after.
+- Watch the **stock count** on cards to warn customers early when something is running low.
+
+### 17.7 · FAQ
+
+**Can I sell an item that's out of stock?**
+No. Out-of-stock items can't be added to the cart.
+
+**Can I give a 20% discount?**
+Not currently. The maximum is 15%. Manager-approved discounts are planned.
+
+**Is tax included?**
+No tax is calculated at the register.
+
+**Where can I see the sale afterwards?**
+Every completed sale creates one entry in the **Cash** ledger (`/cash`), under Cash or Card depending on the payment method you chose.
+
+**What happens to the cart if I close the page mid-sale?**
+The cart is not saved. Items would need to be added again.
+
+### 17.8 · Glossary
+
+| Term | Meaning |
+|---|---|
+| **SKU** | The unique product code (for example `HYD-GUM-20`). |
+| **Bundle** | A promotion where buying a set quantity gets a lower combined price. |
+| **Rebate / discount tier** | The manual percentage taken off the cart total. |
+| **Ledger** | The record of money in and out (`CashLog`). |
+| **Operator** | The signed-in person running the register. |
+
+---
+
+## 18 · Technical Design
+
+> **Purpose:** Bridge the requirements above and the implementation. This section maps the system architecture, data flow, and component responsibilities for the *Complete a POS Sale* flow, and proposes the hardening work called out in [§13](#13--security--authorization).
+>
+> **Legend:** ✅ implemented today · 🟡 proposed change
+
+### 18.1 · Goals & Non-Goals
+
+| Goals | Non-Goals |
+|---|---|
+| Deterministic, testable cart pricing | Tax calculation |
+| Real-time UI feedback on every cart change | Card payment processing (no gateway integration) |
+| One authenticated, auditable sale per checkout | Refunds and returns |
+| Atomic stock + ledger commit 🟡 | Offline mode |
+| Full telemetry coverage | Manager-approved discounts (future, see A7) |
+
+### 18.2 · Architecture Overview
+
+```mermaid
+flowchart LR
+    subgraph Client["🖥️ Browser (Next.js 15 App Router)"]
+        UI["POS Terminal page<br/>/pos"]
+        CART["Cart state<br/>(React state)"]
+        CALC["calculateCartTotals()<br/>pure function"]
+        TEL["pushTelemetry()<br/>sessionStorage"]
+        RQ["tRPC React client<br/>+ query cache"]
+    end
+
+    subgraph Server["⚙️ Server (Next.js route handlers)"]
+        MW["Middleware<br/>route protection"]
+        AUTH["NextAuth v5<br/>JWT session"]
+        TRPC["tRPC 11 routers"]
+        PRISMA["Prisma 6 client"]
+    end
+
+    DB[("🗄️ PostgreSQL")]
+
+    UI --> CART --> CALC
+    UI --> TEL
+    UI --> RQ --> TRPC
+    MW --> AUTH
+    TRPC --> AUTH
+    TRPC --> PRISMA --> DB
+```
+
+| Layer | Technology | Responsibility |
+|---|---|---|
+| **Presentation** | Next.js 15, React, Tailwind | POS screen, cart, totals, feedback banners |
+| **Client state** | React state + tRPC query cache | Active cart, selected method/discount; server data via cached queries |
+| **Domain logic** | `calculateCartTotals` (pure TS) | Pricing, bundles, discounts |
+| **API** | tRPC 11 | Type-safe procedures shared between client and server |
+| **Auth** | NextAuth v5 (credentials, bcrypt, JWT) | Operator identity and route protection |
+| **Persistence** | Prisma 6 + PostgreSQL | Products, promotions, ledger |
+| **Observability** | `pushTelemetry` + Command Center feed | Client-emitted event stream |
+
+### 18.3 · Component Responsibilities
+
+| Component | Type | Responsibilities | Depends on |
+|---|---|---|---|
+| `PosTerminalPage` | Client component | Layout, wiring data hooks, checkout handler | All below |
+| `ProductGrid` / `ProductCard` | UI | Render catalog, disabled state for `stockQty ≤ 0`, tap-to-add | `product.getAll` |
+| `SearchBar` | UI | Controlled input driving a case-insensitive filter on `name` and `sku` | none |
+| `CartLedger` | UI | Line items, quantity steppers, remove | cart state |
+| `PaymentSelector` / `DiscountSelector` | UI | Set `method` (`CASH \| CARD`) and `discountPercent` (`0 \| 5 \| 10 \| 15`) | cart state |
+| `TotalsPanel` | UI | Render subtotal, bundle lines, rebate, final total | `calculateCartTotals` |
+| `calculateCartTotals` | Pure function | Deterministic pricing (see [§10](#10--promotion-engine-spec)) | none |
+| `pushTelemetry` | Utility | Append events to `sessionStorage` and broadcast | none |
+| tRPC routers | Server | `product`, `promotion`, `cashLog` (and 🟡 `sale`) | Prisma, session |
+
+### 18.4 · Data Model
+
+```mermaid
+erDiagram
+    USER ||--o{ CASHLOG : "records"
+    PRODUCT {
+        string id PK
+        string name
+        string sku
+        decimal price
+        int stockQty
+    }
+    PROMOTION {
+        string id PK
+        string name
+        string targetSkuPattern
+        int requiredQty
+        decimal bundlePrice
+        boolean isActive
+    }
+    CASHLOG {
+        string id PK
+        string type "IN | OUT"
+        string method "CASH | CARD"
+        decimal amount
+        string reason
+        string userId FK
+        datetime createdAt
+    }
+    USER {
+        string id PK
+        string name
+    }
+```
+
+**Design notes**
+
+- `Promotion` is read-only from the POS and evaluated **client-side** against the cart.
+- `CashLog` carries no foreign key to `Product`, so a sale's line items are only summarized in `reason`. 🟡 A `Sale` / `SaleItem` pair would give a proper audit trail:
+
+```mermaid
+erDiagram
+    SALE ||--|{ SALEITEM : contains
+    SALE ||--|| CASHLOG : "produces"
+    PRODUCT ||--o{ SALEITEM : "sold as"
+    SALE {
+        string id PK
+        string userId FK
+        string method
+        decimal subtotal
+        decimal bundleSavings
+        int discountPercent
+        decimal total
+        datetime createdAt
+    }
+    SALEITEM {
+        string id PK
+        string saleId FK
+        string productId FK
+        int quantity
+        decimal unitPrice
+    }
+```
+
+### 18.5 · API Design
+
+| Procedure | Access | Input | Output | Notes |
+|---|---|---|---|---|
+| `product.getAll` | public ✅ | none | `Product[]` | Hydrates catalog |
+| `promotion.getAll` | public ✅ | none | `Promotion[]` | Hydrates bundle rules |
+| `product.updateStock` | public ✅ → protected 🟡 | `{ id, stockQty }` | `Product` | Client sends the *new* quantity, which is race-prone (see 18.7) |
+| `cashLog.create` | protected ✅ | `{ type, method, amount, reason }` | `CashLog` | `userId` taken from session |
+| `sale.create` | protected 🟡 | `{ items: {productId, quantity}[], method, discountPercent }` | `Sale` | Single atomic checkout |
+
+### 18.6 · Checkout Flow: Current vs. Proposed
+
+**✅ Current (client-orchestrated)**
+
+```mermaid
+flowchart TD
+    A[Complete Checkout] --> B{Cart empty?}
+    B -- yes --> X[Button disabled]
+    B -- no --> C[For each item: product.updateStock]
+    C --> D{All ok?}
+    D -- no --> E[ERROR: TRANSACTION ABORTED<br/>⚠️ earlier decrements remain]
+    D -- yes --> F[cashLog.create]
+    F --> G{ok?}
+    G -- no --> E
+    G -- yes --> H[Invalidate queries, clear cart, banner]
+```
+
+**🟡 Proposed (server-orchestrated, atomic)**
+
+```mermaid
+flowchart TD
+    A[Complete Checkout] --> B[sale.create]
+    B --> T{{"db.$transaction"}}
+    T --> V[Load products, verify stock and prices]
+    V --> R[Recompute totals server-side]
+    R --> U[Decrement stock with guarded update]
+    U --> S[Insert Sale + SaleItems]
+    S --> L[Insert CashLog]
+    L --> OK[Commit]
+    T -- any error --> RB[Rollback everything]
+    OK --> H[Invalidate queries, clear cart, banner]
+    RB --> E[ERROR: TRANSACTION ABORTED<br/>cart preserved, nothing saved]
+```
+
+**Reference implementation sketch** 🟡
+
+```ts
+// server/api/routers/sale.ts
+export const saleRouter = createTRPCRouter({
+  create: protectedProcedure
+    .input(z.object({
+      items: z.array(z.object({
+        productId: z.string(),
+        quantity: z.number().int().positive(),
+      })).min(1),
+      method: z.enum(["CASH", "CARD"]),
+      discountPercent: z.union([z.literal(0), z.literal(5), z.literal(10), z.literal(15)]),
+    }))
+    .mutation(({ ctx, input }) =>
+      ctx.db.$transaction(async (tx) => {
+        const products = await tx.product.findMany({
+          where: { id: { in: input.items.map(i => i.productId) } },
+        });
+        const promotions = await tx.promotion.findMany({ where: { isActive: true } });
+
+        // Recompute pricing on the server; never trust client totals
+        const cart = input.items.map(i => ({ ...products.find(p => p.id === i.productId)!, quantity: i.quantity }));
+        const totals = calculateCartTotals(cart, input.discountPercent, promotions);
+
+        // Guarded decrement: fails if stock changed since the cashier loaded the page
+        for (const item of input.items) {
+          const { count } = await tx.product.updateMany({
+            where: { id: item.productId, stockQty: { gte: item.quantity } },
+            data: { stockQty: { decrement: item.quantity } },
+          });
+          if (count === 0) throw new TRPCError({ code: "CONFLICT", message: "Insufficient stock" });
+        }
+
+        await tx.cashLog.create({
+          data: {
+            type: "IN",
+            method: input.method,
+            amount: totals.finalTotal,
+            reason: `POS Sale via ${input.method} (${input.items.length} items)`,
+            userId: ctx.session.user.id,
+          },
+        });
+
+        return totals;
+      })
+    ),
+});
+```
+
+### 18.7 · Key Design Decisions & Trade-offs
+
+| # | Decision | Rationale | Trade-off |
+|---|---|---|---|
+| **D1** | Pricing is a **pure function** shared by client and server | Testable, deterministic, identical result in preview and commit | Client and server must import the same module |
+| **D2** | Promotions evaluated **client-side** for live feedback | Instant totals with no round-trips | Server must re-evaluate at commit 🟡 |
+| **D3** | Cart lives in **React state**, not the DB | Fast, simple, no draft-cart cleanup | Cart lost on refresh |
+| **D4** | tRPC over REST | End-to-end types, no schema drift | Couples client and server in one repo |
+| **D5** | Stock guarded with `stockQty >= qty` inside the update 🟡 | Prevents overselling when two registers sell the last unit | Slightly more complex than a plain update |
+| **D6** | Server recomputes totals 🟡 | Client-supplied `amount` can be tampered with | Small extra DB read per sale |
+| **D7** | Single `sale.create` procedure 🟡 | Atomicity, one network call, one audit record | Replaces the current per-item `updateStock` flow |
+
+### 18.8 · Known Issues & Risks
+
+| ID | Issue | Impact | Mitigation |
+|---|---|---|---|
+| **R1** | Checkout is non-atomic | Partial sales; stock and ledger drift | `sale.create` in `$transaction` |
+| **R2** | `updateStock` is public | Anyone can zero out stock | Make protected, or remove once R1 ships |
+| **R3** | Stock set to an absolute value from the client | Two registers can overwrite each other (lost update) | Use `decrement` with a guard (D5) |
+| **R4** | Client-computed `amount` trusted by `cashLog.create` | Ledger tampering | Server recomputes (D6) |
+| **R5** | Telemetry message says "Ledger rolled back" | Inaccurate until R1 ships | Reword, or fix via R1 |
+| **R6** | Middleware matcher incomplete | Some routes unprotected | Extend to `/inventory`, `/analytics`, `/database`, `/manager/*` |
+| **R7** | Telemetry is in `sessionStorage` only | Events lost on tab close; not a durable audit log | Persist server-side |
+
+### 18.9 · Error Handling
+
+| Failure | Detection | Behavior |
+|---|---|---|
+| Insufficient stock at commit 🟡 | Guarded update returns `count = 0` | `CONFLICT`; transaction rolls back; cashier sees the error and refreshed stock |
+| Session expired | tRPC `UNAUTHORIZED` | Redirect to sign-in; cart preserved in memory until navigation |
+| Network failure | Mutation rejects | `ERROR: TRANSACTION ABORTED`; cart preserved; safe to retry once R1 ships |
+| Unknown server error | `INTERNAL_SERVER_ERROR` | Same as above; logged with a `SYS` telemetry event |
+
+### 18.10 · Performance & Scalability
+
+- **Client:** Cart math is O(cart lines × promotion rules). It runs on every change, which is trivial at retail scale.
+- **Network:** Two hydration queries on load; 🟡 one mutation at checkout (down from *n + 1*).
+- **Database:** Index `Product.sku` for search and `CashLog.createdAt` for ledger reads.
+- **Targets:** Median checkout under 45s (human-dominated); server `sale.create` p95 under 300 ms.
+
+### 18.11 · Testing Strategy
+
+| Level | Scope | Tools (suggested) |
+|---|---|---|
+| **Unit** | `calculateCartTotals`: single bundle, stacked bundles, clamping (BR-10), discount ordering | Vitest |
+| **Component** | Disabled out-of-stock card, stock ceiling, empty-cart checkout button | React Testing Library |
+| **Integration** | tRPC `sale.create` against a test database: success, insufficient stock rollback, unauthenticated call | Vitest + test Postgres |
+| **End-to-end** | Test cases TC-01 to TC-08 ([§15](#15--test-scenarios)) | Playwright |
+| **Concurrency** | Two simultaneous checkouts for the last unit: exactly one succeeds | Integration test with parallel calls |
+
+### 18.12 · Rollout Plan for the Atomic Checkout 🟡
+
+1. Extract `calculateCartTotals` into a shared module used by client and server.
+2. Add the `sale.create` procedure with `$transaction` and guarded stock updates.
+3. Add `Sale` / `SaleItem` models via a Prisma migration.
+4. Switch the POS checkout handler to call `sale.create`; remove the per-item loop.
+5. Make `product.updateStock` protected (or delete it).
+6. Update telemetry messages and A6 in [§6](#6--exception--alternative-flows).
+7. Extend the middleware matcher and re-run the security checks in [§13](#13--security--authorization).
+
+### 18.13 · Open Questions
+
+- Should ledger reason strings be replaced by structured `SaleItem` rows, and should historic `CashLog` entries be backfilled?
+- Should a sale be **voidable** by a manager, and how should that reverse stock and the ledger?
+- Is a persistent server-side draft cart needed for multi-register or hand-over-shift scenarios?
+- Should card sales record a payment reference from the card terminal?
 
 ---
 
