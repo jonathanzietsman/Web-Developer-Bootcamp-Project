@@ -21,7 +21,6 @@ import {
   Percent, 
   Lock, 
   UserCheck, 
-  Cpu, 
   CheckCircle2, 
   SlidersHorizontal,
   Bell

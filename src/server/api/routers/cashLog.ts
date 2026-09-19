@@ -113,7 +113,7 @@ export const cashLogRouter = createTRPCRouter({
     .mutation(async ({ ctx, input }) => {
       try {
         return await ctx.db.cashLog.delete({ where: { id: input.id } });
-      } catch (error) {
+      } catch (_error) {
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Failed to delete log entry.",

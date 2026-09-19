@@ -1,3 +1,4 @@
+// src/server/auth.config.ts
 import type { NextAuthConfig } from "next-auth";
 
 export const authConfig = {
@@ -8,7 +9,7 @@ export const authConfig = {
     // signIn: "/login",
   },
   callbacks: {
-    authorized({ auth, request: { nextUrl } }) {
+    authorized({ auth, request: { nextUrl: _nextUrl } }) {
       const isLoggedIn = !!auth?.user;
       return isLoggedIn;
     },

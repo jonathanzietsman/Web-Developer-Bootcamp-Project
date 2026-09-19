@@ -19,12 +19,10 @@ import {
   ChevronRight, 
   ArrowUpRight, 
   RefreshCw,
-  Cpu,
   PackagePlus,
   Zap,
   ShieldAlert,
   FileSpreadsheet,
-  DollarSign,
   Tag,
   Wallet
 } from "lucide-react";
@@ -113,7 +111,7 @@ export default function AnalyticsPage() {
           <button
             onClick={() => {
               pushTelemetry("API", "Manually synced sales telemetry & inventory catalog");
-              refetch();
+              void refetch();
             }}
             className="flex items-center gap-2 px-3.5 py-2 rounded-xl border border-white/10 bg-white/5 text-slate-200 text-xs hover:bg-white/10 hover:border-white/20 transition cursor-pointer shadow-inner"
           >
@@ -293,7 +291,7 @@ export default function AnalyticsPage() {
             <div className="flex-1 overflow-y-auto space-y-2.5 pr-1 max-h-60 custom-scrollbar">
               {isLoading ? (
                 <div className="flex h-40 items-center justify-center text-indigo-400 text-xs gap-2">
-                  <Cpu className="h-4 w-4 animate-spin" />
+                  <RefreshCw className="h-4 w-4 animate-spin" />
                   <span>FETCHING CATALOG NODES...</span>
                 </div>
               ) : lowStockProducts.length === 0 ? (

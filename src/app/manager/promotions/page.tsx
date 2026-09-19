@@ -24,7 +24,6 @@ import {
   ShieldCheck,
   Zap,
   HelpCircle,
-  AlertCircle
 } from "lucide-react";
 
 export default function PromotionsPage() {
