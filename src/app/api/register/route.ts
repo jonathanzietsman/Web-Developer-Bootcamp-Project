@@ -3,9 +3,15 @@ import { NextResponse } from "next/server";
 import { db } from "@/server/db";
 import bcrypt from "bcrypt";
 
+interface RegisterRequestBody {
+  name?: string;
+  email?: string;
+  password?: string;
+}
+
 export async function POST(req: Request) {
   try {
-    const body = await req.json();
+    const body = (await req.json()) as RegisterRequestBody;
     const { name, email, password } = body;
 
     if (!email || !password) {
@@ -15,8 +21,11 @@ export async function POST(req: Request) {
       );
     }
 
+    const trimmedEmail = email.trim();
+    const trimmedName = name?.trim();
+
     const existingUser = await db.user.findUnique({
-      where: { email: email.trim() },
+      where: { email: trimmedEmail },
     });
 
     if (existingUser) {
@@ -30,8 +39,8 @@ export async function POST(req: Request) {
 
     const user = await db.user.create({
       data: {
-        name: name ? name.trim() : null,
-        email: email.trim(),
+        name: trimmedName ?? null,
+        email: trimmedEmail,
         password: hashedPassword,
       },
     });
@@ -40,7 +49,7 @@ export async function POST(req: Request) {
       { message: "User registered successfully.", userId: user.id },
       { status: 201 }
     );
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { message: "Internal server error." },
       { status: 500 }
