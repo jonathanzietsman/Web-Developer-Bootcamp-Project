@@ -1,5 +1,14 @@
 // src/utils/telemetry.ts
-export type TelemetryType = 'NAV' | 'CLICK' | 'API' | 'SYS';
+export type TelemetryType = 
+  | 'NAV' 
+  | 'CLICK' 
+  | 'API' 
+  | 'SYS' 
+  | 'SIMULATION' 
+  | 'EXPORT' 
+  | 'DB_HANDSHAKE' 
+  | 'AUTH' 
+  | 'ERROR';
 
 export interface TelemetryLog {
   id: string;

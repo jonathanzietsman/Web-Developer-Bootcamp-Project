@@ -121,7 +121,7 @@ export default function AnalyticsPage() {
             <span className="hidden sm:inline font-medium">SYNC DATA</span>
           </button>
           
-          <div className="hidden md:flex items-center gap-2 rounded-xl border border-white/5 bg-white/[0.02] px-3.5 py-1.5 text-xs text-slate-300">
+          <div className="hidden md:flex items-center gap-2 rounded-xl border border-white/5 bg-white/2 px-3.5 py-1.5 text-xs text-slate-300">
             <ShieldCheck className="h-4 w-4 text-emerald-400" />
             <span>SECURE NODE</span>
           </div>
