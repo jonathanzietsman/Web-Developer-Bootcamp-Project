@@ -9,7 +9,9 @@ export type TelemetryType =
   | 'DB_HANDSHAKE' 
   | 'AUTH' 
   | 'ERROR'
-  | 'SEARCH';
+  | 'SEARCH'
+  | 'FILTER'
+  | 'MUTATION';
 
 export interface TelemetryLog {
   id: string;
@@ -37,7 +39,7 @@ export function pushTelemetry(type: TelemetryType, message: string): TelemetryLo
     const logs = getStoredLogs();
     const newLog: TelemetryLog = {
       id: Math.random().toString(36).substring(2, 9),
-      timestamp: new Date().toISOString(), // Standardized ISO timestamp for sorting accuracy
+      timestamp: new Date().toISOString(),
       type,
       message,
     };
@@ -45,7 +47,6 @@ export function pushTelemetry(type: TelemetryType, message: string): TelemetryLo
     const updated = [newLog, ...logs].slice(0, MAX_LOGS);
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     
-    // Dispatch custom event to update active UI panels in real time
     window.dispatchEvent(new Event('apex_telemetry_update'));
     return updated;
   } catch {
