@@ -85,6 +85,7 @@ export const productRouter = createTRPCRouter({
         where: { id: input.id },
       });
     }),
+    
 
   updateStock: publicProcedure
     .input(
