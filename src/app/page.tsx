@@ -10,12 +10,10 @@ import { getStoredLogs, pushTelemetry, clearTelemetry, type TelemetryLog } from 
 import { 
   Terminal, 
   Activity, 
-  ShieldCheck, 
   Home, 
   Layers, 
   BarChart3, 
   Database, 
-  LogOut, 
   X, 
   ChevronRight, 
   RefreshCw, 
@@ -34,10 +32,11 @@ import {
   Globe,
   MousePointer,
   Server,
-  Tag // <-- Added Tag icon
+  Tag,
+  UserPlus,
+  LogIn
 } from "lucide-react";
 
-// Helper function for human-readable relative timestamps
 function getRelativeTime(timestampInput: string) {
   const now = new Date().getTime();
   const then = new Date(timestampInput).getTime();
@@ -55,6 +54,15 @@ function getRelativeTime(timestampInput: string) {
 export default function HomePage() {
   const [isNavOpen, setIsNavOpen] = useState(false);
   const { data: session, status } = useSession();
+
+  // Auth form states
+  const [authMode, setAuthMode] = useState<"login" | "register">("login");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [authError, setAuthError] = useState("");
+  const [authSuccess, setAuthSuccess] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { data: cashSummary, isLoading: cashLoading, refetch: refetchCash } = api.cashLog.getSummary.useQuery(undefined, {
     enabled: !!session,
@@ -75,7 +83,7 @@ export default function HomePage() {
     const initialLogs = getStoredLogs();
     if (initialLogs.length === 0) {
       pushTelemetry("SYS", "Quantum-secure ledger core initialized.");
-      pushTelemetry("SYS", "Node authentication verified via JWT/OAuth bridge.");
+      pushTelemetry("SYS", "Node authentication verified via JWT/Credentials provider.");
       pushTelemetry("SYS", "PostgreSQL instance connected via Supabase prisma pool.");
     }
     setLogs(getStoredLogs());
@@ -98,6 +106,64 @@ export default function HomePage() {
     }, 600);
   };
 
+  const handleAuthSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthError("");
+    setAuthSuccess("");
+    setIsSubmitting(true);
+
+    if (authMode === "register") {
+      try {
+        const res = await fetch("/api/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name, email, password }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          setAuthError(data.message || "Registration failed.");
+          setIsSubmitting(false);
+          return;
+        }
+
+        setAuthSuccess("Account created successfully! Signing in...");
+        pushTelemetry("SYS", `New user registered [${email}]. Authenticating...`);
+
+        // Automatically sign in after registration
+        const signInRes = await signIn("credentials", {
+          email,
+          password,
+          redirect: false,
+        });
+
+        if (signInRes?.error) {
+          setAuthError("Account created, but sign in failed. Please log in manually.");
+        }
+      } catch (err) {
+        setAuthError("An unexpected error occurred during registration.");
+      } finally {
+        setIsSubmitting(false);
+      }
+    } else {
+      pushTelemetry("SYS", `Attempting credentials sign in for [${email}]...`);
+      const signInRes = await signIn("credentials", {
+        email,
+        password,
+        redirect: false,
+      });
+
+      setIsSubmitting(false);
+
+      if (signInRes?.error) {
+        setAuthError("Invalid email or password.");
+      } else {
+        pushTelemetry("SYS", "Authentication successful.");
+      }
+    }
+  };
+
   const totalProducts = products?.length ?? 0;
   const lowStockCount = products?.filter((p) => p.stockQty < 5).length ?? 0;
   const totalValuation = products?.reduce((acc, p) => acc + (p.price * p.stockQty), 0) ?? 0;
@@ -108,10 +174,8 @@ export default function HomePage() {
     .sort((a, b) => {
       const timeA = new Date(a.timestamp).getTime();
       const timeB = new Date(b.timestamp).getTime();
-      
       const validTimeA = isNaN(timeA) ? 0 : timeA;
       const validTimeB = isNaN(timeB) ? 0 : timeB;
-
       return sortOrder === "latest" ? validTimeB - validTimeA : validTimeA - validTimeB;
     });
 
@@ -136,20 +200,79 @@ export default function HomePage() {
           <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border border-indigo-500/20 bg-indigo-500/10 text-indigo-400 shadow-inner">
             <Lock className="h-6 w-6" />
           </div>
+          
           <div>
             <h1 className="text-sm font-bold tracking-tight text-white uppercase">ApexOS // Auth Gateway</h1>
-            <p className="text-xs text-slate-400 mt-1.5">Restricted Terminal Access. Authenticate to initialize the POS matrix.</p>
+            <p className="text-xs text-slate-400 mt-1.5">Enter credentials or create a new user account to access the POS matrix.</p>
           </div>
-          <button
-            onClick={() => {
-              pushTelemetry("SYS", "Initializing NextAuth OAuth gateway provider...");
-              void signIn();
-            }}
-            className="w-full flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 py-3 text-xs font-bold text-white shadow-lg shadow-indigo-600/20 transition cursor-pointer"
-          >
-            <Zap className="h-4 w-4" />
-            INITIALIZE AUTHENTICATION
-          </button>
+
+          <div className="flex rounded-xl bg-white/5 p-1 border border-white/5">
+            <button
+              type="button"
+              onClick={() => { setAuthMode("login"); setAuthError(""); setAuthSuccess(""); }}
+              className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition ${authMode === "login" ? "bg-indigo-600 text-white shadow" : "text-slate-400 hover:text-white"}`}
+            >
+              Sign In
+            </button>
+            <button
+              type="button"
+              onClick={() => { setAuthMode("register"); setAuthError(""); setAuthSuccess(""); }}
+              className={`flex-1 py-1.5 text-xs font-bold rounded-lg transition ${authMode === "register" ? "bg-indigo-600 text-white shadow" : "text-slate-400 hover:text-white"}`}
+            >
+              Register
+            </button>
+          </div>
+
+          <form onSubmit={handleAuthSubmit} className="space-y-3 text-left">
+            {authMode === "register" && (
+              <div>
+                <label className="text-[10px] uppercase font-bold text-slate-400">Full Name</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Operator Name"
+                  className="w-full mt-1 px-3 py-2 bg-black/40 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500"
+                />
+              </div>
+            )}
+
+            <div>
+              <label className="text-[10px] uppercase font-bold text-slate-400">Email Address</label>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="operator@apexpos.com"
+                className="w-full mt-1 px-3 py-2 bg-black/40 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+
+            <div>
+              <label className="text-[10px] uppercase font-bold text-slate-400">Password</label>
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className="w-full mt-1 px-3 py-2 bg-black/40 border border-white/10 rounded-xl text-xs text-white focus:outline-none focus:border-indigo-500"
+              />
+            </div>
+
+            {authError && <p className="text-xs text-rose-400 font-semibold pt-1">{authError}</p>}
+            {authSuccess && <p className="text-xs text-emerald-400 font-semibold pt-1">{authSuccess}</p>}
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full mt-2 flex items-center justify-center gap-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 py-3 text-xs font-bold text-white shadow-lg shadow-indigo-600/20 transition cursor-pointer disabled:opacity-50"
+            >
+              {authMode === "login" ? <LogIn className="h-4 w-4" /> : <UserPlus className="h-4 w-4" />}
+              {isSubmitting ? "PROCESSING..." : authMode === "login" ? "SIGN IN" : "CREATE ACCOUNT"}
+            </button>
+          </form>
         </div>
       </div>
     );
@@ -206,7 +329,7 @@ export default function HomePage() {
       {/* MAIN VIEWPORT BODY */}
       <main className="relative flex flex-1 flex-col overflow-hidden p-6 lg:p-8 space-y-6 max-w-[1700px] w-full mx-auto">
         
-        {/* Quick Action Navigation Cards Grid (Expanded to 5 items) */}
+        {/* Quick Action Navigation Cards Grid */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-5 shrink-0">
           <Link 
             href="/pos" 
@@ -242,7 +365,6 @@ export default function HomePage() {
             </div>
           </Link>
 
-          {/* Added Promotions Quick Card */}
           <Link 
             href="/manager/promotions" 
             onClick={() => pushTelemetry("NAV", "Navigated to Promotions Manager (/manager/promotions)")}
@@ -580,7 +702,6 @@ export default function HomePage() {
                     <ChevronRight className="h-4 w-4 text-slate-600 group-hover:translate-x-0.5 transition-transform" />
                   </Link>
 
-                  {/* Added Promotions in Drawer */}
                   <Link 
                     href="/manager/promotions" 
                     onClick={() => setIsNavOpen(false)}

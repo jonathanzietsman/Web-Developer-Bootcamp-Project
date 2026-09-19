@@ -1,10 +1,10 @@
 // src/server/auth.ts
 import NextAuth, { type DefaultSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import Google from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { db } from "@/server/db";
 import { authConfig } from "./auth.config";
+import bcrypt from "bcrypt";
 
 declare module "next-auth" {
   interface Session extends DefaultSession {
@@ -36,38 +36,38 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
   providers: [
-    Google({
-      clientId: process.env.AUTH_GOOGLE_ID,
-      clientSecret: process.env.AUTH_GOOGLE_SECRET,
-    }),
     CredentialsProvider({
-      name: "Developer Access",
+      name: "Credentials",
       credentials: {
-        username: { label: "Username", type: "text", placeholder: "developer" },
+        email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const username = typeof credentials?.username === "string" ? credentials.username.trim() : "";
-        const password = typeof credentials?.password === "string" ? credentials.password.trim() : "";
+        const email = typeof credentials?.email === "string" ? credentials.email.trim() : "";
+        const password = typeof credentials?.password === "string" ? credentials.password : "";
 
-        if (username === "developer" && password === "dev123") {
-          const devUser = await db.user.upsert({
-            where: { email: "developer@apexpos.local" },
-            update: { name: "Lead Developer" },
-            create: {
-              id: "developer-user-1",
-              name: "Lead Developer",
-              email: "developer@apexpos.local",
-            },
-          });
-
-          return {
-            id: devUser.id,
-            name: devUser.name,
-            email: devUser.email,
-          };
+        if (!email || !password) {
+          return null;
         }
-        return null;
+
+        const user = await db.user.findUnique({
+          where: { email },
+        });
+
+        if (!user || !user.password) {
+          return null;
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+          return null;
+        }
+
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+        };
       },
     }),
   ],
