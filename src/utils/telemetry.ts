@@ -8,7 +8,8 @@ export type TelemetryType =
   | 'EXPORT' 
   | 'DB_HANDSHAKE' 
   | 'AUTH' 
-  | 'ERROR';
+  | 'ERROR'
+  | 'SEARCH';
 
 export interface TelemetryLog {
   id: string;
